@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Moje Kody – Python, C#, XAML</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Prezentacja przykładów kodu w Pythonie, C# i XAML oraz krótkich artykułów." />
+
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg-alt: #111827;
+            --card-bg: #020617;
+            --accent: #38bdf8;
+            --accent-soft: rgba(56, 189, 248, 0.15);
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --border: #1f2937;
+            --radius-lg: 18px;
+            --radius-xl: 24px;
+            --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.7);
+            --shadow-subtle: 0 10px 30px rgba(15, 23, 42, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* HEADER */
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(18px);
+            background: linear-gradient(to bottom,
+                    rgba(15, 23, 42, 0.96),
+                    rgba(15, 23, 42, 0.8),
+                    transparent);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.9rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .logo-mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 30% 0, #e0f2fe, #38bdf8 40%, #0f172a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.55);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .logo-text-main {
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            font-size: 0.95rem;
+        }
+
+        .logo-text-sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a {
+            padding: 0.45rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            color: var(--muted);
+            transition: 0.15s ease;
+        }
+
+        .nav-links a:hover {
+            color: #f9fafb;
+            border-color: rgba(148, 163, 184, 0.6);
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .nav-links a.nav-cta {
+            border-color: rgba(56, 189, 248, 0.7);
+            background: linear-gradient(120deg, #0ea5e9, #22d3ee);
+            color: #0b1120;
+            font-weight: 600;
+            padding-inline: 1.2rem;
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.5);
+        }
+
+        .nav-links a.nav-cta:hover {
+            filter: brightness(1.05);
+        }
+
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            border-radius: 999px;
+            padding: 0.35rem 0.55rem;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .nav-toggle span {
+            display: block;
+            width: 18px;
+            height: 2px;
+            margin: 3px 0;
+            background: var(--text);
+            border-radius: 999px;
+        }
+
+        /* HERO */
+
+        main {
+            padding-bottom: 3rem;
+        }
+
+        .hero {
+            padding: 3.5rem 0 2rem;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .hero-kicker {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--muted);
+            margin-bottom: 0.8rem;
+        }
+
+        .hero-title {
+            font-size: clamp(2.1rem, 3vw, 2.7rem);
+            font-weight: 650;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title span {
+            background: linear-gradient(120deg, #38bdf8, #f97316);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 0.98rem;
+            color: var(--muted);
+            max-width: 34rem;
+        }
+
+        .hero-actions {
+            margin-top: 1.6rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.65rem 1.2rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.15s ease-in-out;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(120deg, #0ea5e9, #22c55e);
+            color: #0b1120;
+            font-weight: 600;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.08);
+            transform: translateY(-1px);
+        }
+
+        .btn-ghost {
+            background: rgba(15, 23, 42, 0.8);
+            color: var(--muted);
+            border-color: rgba(148, 163, 184, 0.5);
+        }
+
+        .btn-ghost:hover {
+            color: #f9fafb;
+            border-color: rgba(148, 163, 184, 0.9);
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        .hero-meta {
+            margin-top: 0.7rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        /* Hero code preview */
+
+        .hero-card {
+            background: radial-gradient(circle at top, #1f2937 0, #020617 50%);
+            border-radius: var(--radius-xl);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: var(--shadow-soft);
+            padding: 1.1rem 1.2rem;
+        }
+
+        .hero-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+        }
+
+        .hero-card-tabs {
+            display: flex;
+            gap: 0.35rem;
+            font-size: 0.7rem;
+        }
+
+        .hero-card-tab {
+            padding: 0.25rem 0.65rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--muted);
+        }
+
+        .hero-card-tab.active {
+            background: rgba(56, 189, 248, 0.1);
+            color: #e0f2fe;
+            border-color: rgba(56, 189, 248, 0.6);
+        }
+
+        .hero-card-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .hero-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: #4b5563;
+        }
+
+        .hero-dot:nth-child(1) {
+            background: #ef4444;
+        }
+
+        .hero-dot:nth-child(2) {
+            background: #facc15;
+        }
+
+        .hero-dot:nth-child(3) {
+            background: #22c55e;
+        }
+
+        pre {
+            margin: 0;
+            border-radius: 0.75rem;
+            padding: 0.85rem 0.9rem;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            overflow-x: auto;
+            background: radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 100%);
+            border: 1px solid rgba(15, 23, 42, 0.9);
+        }
+
+        code {
+            font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            color: #e5e7eb;
+        }
+
+        .code-comment {
+            color: #6b7280;
+        }
+
+        .code-kw {
+            color: #22c55e;
+        }
+
+        .code-fn {
+            color: #38bdf8;
+        }
+
+        .code-str {
+            color: #f97316;
+        }
+
+        .code-type {
+            color: #a855f7;
+        }
+
+        /* SECTIONS */
+
+        section {
+            padding: 2.5rem 0 1rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 1.4rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .section-subtitle {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .pill {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.7rem;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            color: var(--muted);
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.1rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .grid-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .card {
+            background: radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 100%);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            padding: 0.9rem 1rem;
+            box-shadow: var(--shadow-subtle);
+            transition: 0.15s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 35px rgba(15, 23, 42, 0.8);
+            border-color: rgba(56, 189, 248, 0.7);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.4rem;
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 550;
+        }
+
+        .badge-lang {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            background: rgba(15, 23, 42, 0.95);
+            color: var(--muted);
+        }
+
+        .card-desc {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .card-meta {
+            font-size: 0.7rem;
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            padding: 0.1rem 0.45rem;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(31, 41, 55, 0.9);
+            color: var(--muted);
+        }
+
+        /* ABOUT */
+
+        .about-wrapper {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+            gap: 1.5rem;
+        }
+
+        .about-text {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .stack-list {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0 0;
+            font-size: 0.85rem;
+        }
+
+        .stack-list li::before {
+            content: "•";
+            margin-right: 0.4rem;
+            color: var(--accent);
+        }
+
+        .about-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            padding: 0.8rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .about-card h3 {
+            margin-top: 0;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+
+        .about-card p {
+            margin: 0.2rem 0;
+        }
+
+        /* FOOTER */
+
+        footer {
+            border-top: 1px solid rgba(148, 163, 184, 0.3);
+            padding: 1.2rem 0 1.6rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .footer-inner {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .footer-links a {
+            text-decoration: underline;
+            text-decoration-style: dotted;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 768px) {
+
+            .hero-grid,
+            .about-wrapper {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .hero {
+                padding-top: 2.4rem;
+            }
+
+            .header-inner {
+                padding-block: 0.6rem;
+            }
+
+            .nav-toggle {
+                display: inline-flex;
+                flex-direction: column;
+            }
+
+            .nav-links {
+                position: fixed;
+                inset-inline: 1.5rem;
+                top: 3.1rem;
+                flex-direction: column;
+                padding: 0.8rem;
+                background: rgba(15, 23, 42, 0.98);
+                border-radius: 1.2rem;
+                border: 1px solid rgba(148, 163, 184, 0.4);
+                box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+                transform-origin: top center;
+                transform: scaleY(0.6);
+                opacity: 0;
+                pointer-events: none;
+                transition: 0.15s ease-out;
+            }
+
+            .nav-links.nav-open {
+                opacity: 1;
+                transform: scaleY(1);
+                pointer-events: auto;
+            }
+
+            .nav-links a {
+                width: 100%;
+                text-align: center;
+            }
+
+            .hero-card {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="logo">
+                <div class="logo-mark">DEV</div>
+                <div>
+                    <div class="logo-text-main">Moje Kody</div>
+                    <div class="logo-text-sub">Python • C# • XAML</div>
+                </div>
+            </div>
+
+            <button class="nav-toggle" aria-label="Otwórz menu">
+                <span></span><span></span><span></span>
+            </button>
+
+            <nav>
+                <div class="nav-links">
+                    <a href="#python">Python</a>
+                    <a href="#csharp">C#</a>
+                    <a href="#xaml">XAML</a>
+                    <a href="#artykuly">Artykuły</a>
+                    <a href="#o-mnie" class="nav-cta">O mnie</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- HERO -->
+        <section class="hero">
+            <div class="container hero-grid">
+                <div>
+                    <div class="hero-kicker">Repozytorium przykładów i notatek</div>
+                    <h1 class="hero-title">
+                        Python, <span>C#</span> i XAML w jednym miejscu.
+                    </h1>
+                    <p class="hero-subtitle">
+                        Krótkie, praktyczne przykłady kodu z komentarzem po polsku.
+                        Bez „lania wody” – od razu do rzeczy.
+                    </p>
+
+                    <div class="hero-actions">
+                        <a href="#python" class="btn btn-primary">Zacznij od Pythona</a>
+                        <a href="#artykuly" class="btn btn-ghost">Przejdź do artykułów</a>
+                    </div>
+                    <div class="hero-meta">
+                        🧩 Plan: rozbudowa przykładów + integracja z repozytorium GitHub.
+                    </div>
+                </div>
+
+                <aside class="hero-card" aria-label="Podgląd przykładowego kodu">
+                    <div class="hero-card-header">
+                        <div class="hero-card-tabs">
+                            <span class="hero-card-tab active">python_demo.py</span>
+                            <span class="hero-card-tab">Program.cs</span>
+                            <span class="hero-card-tab">MainPage.xaml</span>
+                        </div>
+                        <div class="hero-card-dots">
+                            <span class="hero-dot"></span>
+                            <span class="hero-dot"></span>
+                            <span class="hero-dot"></span>
+                        </div>
+                    </div>
+                    <pre><code><span class="code-comment"># Prosty przykład w Pythonie</span>
+<span class="code-kw">def</span> <span class="code-fn">powitaj</span>(imie: <span class="code-type">str</span>) -&gt; <span class="code-type">str</span>:
+    <span class="code-str">"""Zwraca spersonalizowane powitanie."""</span>
+    <span class="code-kw">return</span> <span class="code-str">f"Cześć, {imie}! 👋"</span>
+
+
+<span class="code-kw">if</span> __name__ == <span class="code-str">"__main__"</span>:
+    print(powitaj(<span class="code-str">"Świecie"</span>))</code></pre>
+                </aside>
+            </div>
+        </section>
+
+        <!-- PYTHON -->
+        <section id="python">
+            <div class="container">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">Python</div>
+                        <div class="section-subtitle">Skrypty, automatyzacja, małe narzędzia.</div>
+                    </div>
+
+                </div>
+
+                <div class="grid grid-3">
+                    <article class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <a href="python1.html">Tworzenie gier Python 1</a>
+                            </h2>
+                            <span class="badge-lang">Python</span>
+                        </div>
+                        Tekst dotyczący tej podstrony
+                        Tekst dotyczący tej podstrony
+                        Tekst dotyczący tej podstrony
+                        Tekst dotyczący tej podstrony
+                    </article>
+                    <article class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <a href="python2.html">Tworzenie gier Python 2</a>
+                            </h2>
+                            <span class="badge-lang">Python</span>
+                        </div>
+                        Tekst dotyczący tej podstrony
+                        Tekst dotyczący tej podstrony
+                        Tekst dotyczący tej podstrony
+                        Tekst dotyczący tej podstrony
+                    </article>
+                    <article class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <a href="python3.html">Tworzenie gier Python 3</a>
+                            </h2>
+                            <span class="badge-lang">Python</span>
+                        </div>
+                        Tekst dotyczący tej podstrony
+                        Tekst dotyczący tej podstrony
+                        Tekst dotyczący tej podstrony
+                        Tekst dotyczący tej podstrony
+                    </article>
+
+
+                </div>
+            </div>
+        </section>
+
+        <!-- C# -->
+        <section id="csharp">
+            <div class="container">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">C#</div>
+                        <div class="section-subtitle">Fragmenty pod aplikacje konsolowe i nie tylko.</div>
+                    </div>
+
+                </div>
+
+                <div class="grid grid-2">
+                    <article class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Hello World (konsola)</h2>
+                            <span class="badge-lang">C#</span>
+                        </div>
+                        <p class="card-desc">
+                            Klasyczny przykład w nowoczesnej składni C#.
+                        </p>
+                        <pre><code>Console.WriteLine("Hello, World!");</code></pre>
+                        <div class="card-meta">
+                            <div class="tag-row">
+                                <span class="tag">Console</span>
+                                <span class="tag">.NET</span>
+                            </div>
+                            <span>Poziom: 🟢</span>
+                        </div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Mała klasa z właściwościami</h2>
+                            <span class="badge-lang">C#</span>
+                        </div>
+                        <p class="card-desc">
+                            Przykład prostego modelu danych z inicjalizatorem obiektu.
+                        </p>
+                        <pre><code>public class Osoba
+{
+    public string Imie { get; set; } = "";
+    public int Wiek { get; set; }
+}</code></pre>
+                        <div class="card-meta">
+                            <div class="tag-row">
+                                <span class="tag">class</span>
+                                <span class="tag">properties</span>
+                            </div>
+                            <span>Poziom: 🟡</span>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- XAML -->
+        <section id="xaml">
+            <div class="container">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">XAML</div>
+                        <div class="section-subtitle">Widoki, kontrolki, bindowanie danych.</div>
+                    </div>
+
+                </div>
+
+                <div class="grid grid-2">
+                    <article class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Przykładowy przycisk</h2>
+                            <span class="badge-lang">XAML</span>
+                        </div>
+                        <p class="card-desc">
+                            Prosty przycisk z tekstem i marginesem.
+                        </p>
+                        <pre><code>&lt;Button Content="Kliknij mnie"
+        Margin="8"
+        Padding="12,6"/&gt;</code></pre>
+                        <div class="card-meta">
+                            <div class="tag-row">
+                                <span class="tag">Button</span>
+                                <span class="tag">Layout</span>
+                            </div>
+                            <span>Poziom: 🟢</span>
+                        </div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">StackPanel pionowy</h2>
+                            <span class="badge-lang">XAML</span>
+                        </div>
+                        <p class="card-desc">
+                            Ułożenie kilku elementów w kolumnie.
+                        </p>
+                        <pre><code>&lt;StackPanel Orientation="Vertical"&gt;
+    &lt;TextBlock Text="Nagłówek" FontSize="18"/&gt;
+    &lt;Button Content="OK"/&gt;
+&lt;/StackPanel&gt;</code></pre>
+                        <div class="card-meta">
+                            <div class="tag-row">
+                                <span class="tag">StackPanel</span>
+                                <span class="tag">TextBlock</span>
+                            </div>
+                            <span>Poziom: 🟢</span>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ARTYKUŁY -->
+        <section id="artykuly">
+            <div class="container">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">Artykuły i notatki</div>
+                        <div class="section-subtitle">
+                            Miejsce na krótkie opisy, porady i wyjaśnienia.
+                        </div>
+                    </div>
+                    <span class="pill">TODO: podpiąć wpisy z GitHub</span>
+                </div>
+
+                <div class="grid grid-2">
+                    <article class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Jak korzystać z tego repo?</h2>
+                        </div>
+                        <p class="card-desc">
+                            Krótki opis, jak szukać przykładów: według języka, tematu lub poziomu trudności.
+                        </p>
+                        <p class="card-desc">
+                            👉 Docelowo: linki do folderów i plików w GitHubie.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Pomysły na rozwój</h2>
+                        </div>
+                        <p class="card-desc">
+                            • więcej przykładów z komentarzami<br />
+                            • małe projekty „od A do Z”<br />
+                            • sekcja z zadaniami do samodzielnego rozwiązania
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- O MNIE -->
+        <section id="o-mnie">
+            <div class="container">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">O mnie</div>
+                        <div class="section-subtitle">Kilka słów o autorze strony.</div>
+                    </div>
+                    <span class="pill">sekcja do uzupełnienia</span>
+                </div>
+
+                <div class="about-wrapper">
+                    <div class="about-text">
+                        <p>
+                            Tutaj możesz dodać kilka zdań o tym, jakich technologii używasz,
+                            czym zajmujesz się na co dzień i czego można się spodziewać po przykładach na stronie.
+                        </p>
+                        <ul class="stack-list">
+                            <li>Python – skrypty, analiza danych, automatyzacja.</li>
+                            <li>C# – aplikacje konsolowe, desktopowe, webowe.</li>
+                            <li>XAML – interfejsy użytkownika w WPF/MAUI/UWP.</li>
+                        </ul>
+                    </div>
+
+                    <aside class="about-card">
+                        <h3>Status projektu</h3>
+                        <p>✅ Strona startowa gotowa (GitHub Pages / statyczne HTML).</p>
+                        <p>🛠 Kolejny krok: podpięcie linków do konkretnych plików w repozytorium.</p>
+                        <p>💡 Możliwe rozszerzenia: wyszukiwarka, filtrowanie po języku, tagach i poziomie.</p>
+                    </aside>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-inner">
+            <div>
+                © <span id="year"></span> Moje Kody. Wszystkie prawa zastrzeżone.
+            </div>
+            <div class="footer-links">
+                <!-- Podmień na prawdziwe linki do repozytorium -->
+                <a href="#" target="_blank" rel="noopener">GitHub</a>
+                <a href="#o-mnie">Kontakt</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Rok w stopce
+        document.getElementById("year").textContent = new Date().getFullYear();
+
+        // Proste menu mobilne
+        const navToggle = document.querySelector(".nav-toggle");
+        const navLinks = document.querySelector(".nav-links");
+
+        navToggle.addEventListener("click", () => {
+            navLinks.classList.toggle("nav-open");
+        });
+    </script>
+</body>
+
+</html>

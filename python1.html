@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Projektowanie gier w Python 1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Podstrona z przykładowym kodem i zadaniami do wykonania." />
+
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg-alt: #111827;
+            --card-bg: #020617;
+            --accent: #38bdf8;
+            --accent-soft: rgba(56, 189, 248, 0.15);
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --border: #1f2937;
+            --radius-lg: 18px;
+            --radius-xl: 24px;
+            --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.7);
+            --shadow-subtle: 0 10px 30px rgba(15, 23, 42, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* HEADER */
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(18px);
+            background: linear-gradient(to bottom,
+                    rgba(15, 23, 42, 0.96),
+                    rgba(15, 23, 42, 0.8),
+                    transparent);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.9rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .logo-mark {
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 30% 0, #e0f2fe, #38bdf8 40%, #0f172a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.55);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .logo-text-main {
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            font-size: 0.9rem;
+        }
+
+        .logo-text-sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .nav-links a {
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            color: var(--muted);
+            transition: 0.15s ease;
+        }
+
+        .nav-links a:hover {
+            color: #f9fafb;
+            border-color: rgba(148, 163, 184, 0.6);
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .nav-links a.nav-cta {
+            border-color: rgba(56, 189, 248, 0.7);
+            background: linear-gradient(120deg, #0ea5e9, #22d3ee);
+            color: #0b1120;
+            font-weight: 600;
+            padding-inline: 1.1rem;
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.5);
+        }
+
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            border-radius: 999px;
+            padding: 0.35rem 0.55rem;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .nav-toggle span {
+            display: block;
+            width: 18px;
+            height: 2px;
+            margin: 3px 0;
+            background: var(--text);
+            border-radius: 999px;
+        }
+
+        /* MAIN */
+
+        main {
+            padding: 2.4rem 0 3rem;
+        }
+
+        .breadcrumbs {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumbs a {
+            text-decoration: underline;
+            text-decoration-style: dotted;
+        }
+
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .page-kicker {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .page-title {
+            font-size: 1.6rem;
+            font-weight: 650;
+            margin-bottom: 0.4rem;
+        }
+
+        .page-meta {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        .pill {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.7rem;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            color: var(--muted);
+            margin-top: 0.5rem;
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 6fr) minmax(0, 1.2fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .layout-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .header-inner {
+                padding-block: 0.6rem;
+            }
+
+            .nav-toggle {
+                display: inline-flex;
+                flex-direction: column;
+            }
+
+            .nav-links {
+                position: fixed;
+                inset-inline: 1.5rem;
+                top: 3.1rem;
+                flex-direction: column;
+                padding: 0.8rem;
+                background: rgba(15, 23, 42, 0.98);
+                border-radius: 1.2rem;
+                border: 1px solid rgba(148, 163, 184, 0.4);
+                box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+                transform-origin: top center;
+                transform: scaleY(0.6);
+                opacity: 0;
+                pointer-events: none;
+                transition: 0.15s ease-out;
+            }
+
+            .nav-links.nav-open {
+                opacity: 1;
+                transform: scaleY(1);
+                pointer-events: auto;
+            }
+
+            .nav-links a {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        .card {
+            background: radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 100%);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            padding: 0.9rem 1rem;
+            box-shadow: var(--shadow-subtle);
+            margin-bottom: 1rem;
+        }
+
+        .card h2 {
+            font-size: 1rem;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 0.7rem;
+        }
+
+        .card-body {
+            font-size: 0.88rem;
+            color: var(--muted);
+        }
+
+        pre {
+            margin: 0.5rem 0 0;
+            border-radius: 0.75rem;
+            padding: 0.85rem 0.9rem;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            overflow-x: auto;
+            background: radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 100%);
+            border: 1px solid rgba(15, 23, 42, 0.9);
+        }
+
+        code {
+            font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            color: #e5e7eb;
+        }
+
+        .code-comment {
+            color: #6b7280;
+        }
+
+        .code-kw {
+            color: #22c55e;
+        }
+
+        .code-fn {
+            color: #38bdf8;
+        }
+
+        .code-str {
+            color: #f97316;
+        }
+
+        .code-type {
+            color: #a855f7;
+        }
+
+        .task-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 0.4rem 0 0.2rem;
+        }
+
+        .task-list li {
+            position: relative;
+            padding-left: 1.4rem;
+            margin-bottom: 0.4rem;
+            font-size: 0.86rem;
+        }
+
+        .task-list li::before {
+            content: "☑";
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        .task-note {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 0.5rem;
+        }
+
+        .side-card-title {
+            font-size: 0.9rem;
+            margin-top: 0;
+            margin-bottom: 0.35rem;
+        }
+
+        .meta-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .meta-list li {
+            margin-bottom: 0.25rem;
+        }
+
+        .badge-lang {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.18rem 0.6rem;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            background: rgba(15, 23, 42, 0.95);
+            color: var(--muted);
+        }
+
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.7rem;
+        }
+
+        .btn-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            background: rgba(15, 23, 42, 0.96);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.15s ease-in-out;
+            text-decoration: none;
+            white-space: nowrap;
+            color: var(--muted);
+        }
+
+        .btn-link:hover {
+            border-color: rgba(56, 189, 248, 0.7);
+            color: #e0f2fe;
+        }
+
+        footer {
+            border-top: 1px solid rgba(148, 163, 184, 0.3);
+            padding: 1.2rem 0 1.6rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="logo">
+                <div class="logo-mark">DEV</div>
+                <div>
+                    <div class="logo-text-main">Moje Kody</div>
+                    <div class="logo-text-sub">Podstrona z przykładem</div>
+                </div>
+            </div>
+
+            <button class="nav-toggle" aria-label="Otwórz menu">
+                <span></span><span></span><span></span>
+            </button>
+
+            <nav>
+                <div class="nav-links">
+                    <!-- Dostosuj ścieżkę, jeśli index.html jest w innym katalogu -->
+                    <a href="index.html">Strona główna</a>
+                    <a href="index.html#python">Python</a>
+                    <a href="index.html#csharp">C#</a>
+                    <a href="index.html#xaml">XAML</a>
+                    <a href="index.html#artykuly">Artykuły</a>
+                    <a href="index.html#o-mnie" class="nav-cta">O mnie</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- OKRUCHY PANIERY / BREADCRUMBS -->
+            <nav class="breadcrumbs" aria-label="Okruszki nawigacji">
+                <!-- ZMIEŃ NA SWOJE -->
+                <a href="index.html">Strona główna</a> &rsaquo;
+                <span>Tworzenie gier Python 1</span>
+            </nav>
+
+            <!-- NAGŁÓWEK PODSTRONY -->
+            <header class="page-header">
+
+                <!-- Tytuł konkretnego tematu -->
+                <h1 class="page-title">Tworzenie gier Python 1</h1>
+
+
+            </header>
+
+            <div class="layout-grid">
+                <!-- KOLUMNA GŁÓWNA: opis + kod + zadania -->
+                <div>
+                    <!-- OPIS TEMATU -->
+                    <article class="card">
+                        <h2>Opis</h2>
+                        <div class="card-body">
+                            <!-- TUTAJ WPISZ SWÓJ OPIS -->
+                            <p>
+                                Ten skrypt to prosty prototyp tekstowej gry RPG, w której gracz wybiera klasę postaci
+                                (wojownik lub czarodziej), przydziela punkty do statystyk i wyrusza do lasu na spotkanie
+                                z niedźwiedziem. Program pokazuje, jak pobierać dane od użytkownika za pomocą input(),
+                                czyścić ekran, a także jak korzystać z funkcji, pętli i instrukcji warunkowych do
+                                kontrolowania przebiegu rozgrywki. Logika walki opiera się na porównaniu siły gracza
+                                (wyliczanej ze statystyk) z wylosowaną siłą przeciwnika, dzięki czemu można poćwiczyć
+                                proste obliczenia i działanie modułu random. Całość jest dobrym przykładem, jak z kilku
+                                podstawowych elementów Pythona zbudować interaktywną mini-grę w konsoli.
+                            </p>
+                        </div>
+                    </article>
+
+                    <!-- KOD GŁÓWNY -->
+                    <article class="card">
+                        <h2>Kod gry</h2>
+
+                        <div class="card-body">
+                            <pre><code>
+<span class="code-str">
+import os
+import time
+import random
+
+def czysc():
+    os.system("clear")
+
+def przydzielPunkty(punkty, nazwa, wartosc):
+    print(f'Do rozdzielenia: {punkty}')
+    if punkty > 0:
+        ile = int(input(f"{nazwa} – ile punktów?: "))
+        if ile < 0 or ile > punkty:
+            print("Nieprawidłowa liczba punktów.")
+        else:
+            punkty = punkty - ile
+            wartosc = wartosc + ile
+    else:
+        print('Brak punktów')
+    return punkty, wartosc
+
+def powitanie(nazwa_gracza, klasa_gracza):
+    dl_nazwa = len(nazwa_gracza)
+    dl_klasa = len(klasa_gracza)
+    dl_ramki = dl_nazwa + 7
+    if dl_ramki < dl_klasa + 11:
+        dl_ramki = dl_klasa + 11
+    ramka = "#" * dl_ramki
+    czysc()
+    print(f'''
+        {ramka}
+        Witaj {nazwa_gracza},
+        grasz jako {klasa_gracza}
+        {ramka}
+    ''')
+
+def podsumowaniePunkty():
+    czysc()
+    if klasa_gracza == 'wojownik':
+        print(f'''
+        Witaj {nazwa_gracza}
+        grasz jako {klasa_gracza}
+        Przydzieliłeś punkty:
+        Szybkość: {szybkosc}
+        Siła: {sila}
+        Zręczność: {zrecznosc}
+        ''')
+    elif klasa_gracza == 'czarodziej':
+        print(f'''
+        Witaj {nazwa_gracza}
+        grasz jako {klasa_gracza}
+        Przydzieliłeś punkty:
+        Precyzja {precyzja}
+        Inteligencja {inteligencja}
+        Zdrowie {zdrowie}
+        ''')
+#==================================
+#FUNKCJE DOTYCZĄCE FABUŁY
+#==================================
+def pierwszyPunktFabulyLas():
+    print('''
+    Rozpoczynasz swoją przygodę 
+    w środku lasu. Twoim zadaniem
+    jest pokonanie niedzwiedzia
+    grasującego w lesie.
+    ''')
+
+def szukajNiedzwiedzia(gdzieNiedzwiedz):
+    szukanie = True
+    silaNiedzwiedzia = random.randint(5,15)
+    while szukanie:
+        kierunek = input('Ruszasz w kierunku... ')
+        match kierunek:
+            case "północ":
+               if gdzieNiedzwiedz == 1:
+                   print('Spotkałeś niedzwiedzia')
+                   wynik = walkaZNiedzwiedziem(
+                       silaNiedzwiedzia,
+                       szybkosc=szybkosc,
+                       sila=sila,
+                       zrecznosc=zrecznosc,
+                       precyzja=precyzja,
+                       inteligencja=inteligencja,
+                       zdrowie=zdrowie
+                   )
+                   szukanie = False
+               else:
+                   print('Pusta okolica')
+            case "południe":
+                if gdzieNiedzwiedz == 2:
+                    print('Spotkałeś niedzwiedzia')
+                    wynik = walkaZNiedzwiedziem(
+                           silaNiedzwiedzia,
+                           szybkosc=szybkosc,
+                           sila=sila,
+                           zrecznosc=zrecznosc,
+                           precyzja=precyzja,
+                           inteligencja=inteligencja,
+                           zdrowie=zdrowie
+                       )
+                    szukanie = False
+                else:
+                   print('Pusta okolica')
+            case "wschód":
+                if gdzieNiedzwiedz == 3:
+                    print('Spotkałeś niedzwiedzia')
+                    wynik = walkaZNiedzwiedziem(
+                           silaNiedzwiedzia,
+                           szybkosc=szybkosc,
+                           sila=sila,
+                           zrecznosc=zrecznosc,
+                           precyzja=precyzja,
+                           inteligencja=inteligencja,
+                           zdrowie=zdrowie
+                       )
+                    szukanie = False
+                else:
+                   print('Pusta okolica')
+            case "zachód":
+                if gdzieNiedzwiedz == 4:
+                    print('Spotkałeś niedzwiedzia')
+                    wynik = walkaZNiedzwiedziem(
+                           silaNiedzwiedzia,
+                           szybkosc=szybkosc,
+                           sila=sila,
+                           zrecznosc=zrecznosc,
+                           precyzja=precyzja,
+                           inteligencja=inteligencja,
+                           zdrowie=zdrowie
+                       )
+                    szukanie = False
+                else:
+                   print('Pusta okolica')
+        
+def walkaZNiedzwiedziem(silaNiedzwiedzia,
+    szybkosc, sila, zrecznosc,
+    precyzja, inteligencja, zdrowie):
+
+    sila_gracza = (
+    sila * 2 +
+    zrecznosc +
+    precyzja +
+    szybkosc +
+    inteligencja +
+    zdrowie
+    )
+
+    sila_niedzwiedzia_przeliczona = silaNiedzwiedzia * 2
+    
+    if sila_gracza >= sila_niedzwiedzia_przeliczona:
+        print(sila_gracza," ",sila_niedzwiedzia_przeliczona)
+        print("Pokonujesz niedźwiedzia!")
+        return True
+    else:
+        print("Niedźwiedź cię pokonuje...")
+        return False
+
+#==================================
+#TU ROZPOCZYNA SIĘ GŁÓWNA PĘTLA GRY
+#==================================
+
+punkty = 20
+szybkosc = 0
+sila = 0
+zrecznosc = 0
+precyzja = 0
+inteligencja = 0
+zdrowie = 0
+nazwa_gracza = input("Wprowadz nazwę gracza: ")
+poprawnyWybor = False
+while not poprawnyWybor:
+    klasa_gracza = input("Klasa (wojownik/czarodziej): ")
+    if klasa_gracza == "wojownik":
+        powitanie(nazwa_gracza, klasa_gracza)
+        print('''
+        Podziel 20 punktów umiejętności.
+        Szybkość, Siła, Zręczność
+        ''')
+        while punkty > 0 or punkty < 0:
+            czysc()
+            punkty, szybkosc = przydzielPunkty(punkty, "Szybkość", szybkosc)
+            punkty, sila = przydzielPunkty(punkty, "Siła", sila)
+            punkty, zrecznosc = przydzielPunkty(punkty, "Zręczność", zrecznosc)
+            if punkty > 0 or punkty < 0:
+                punkty = 20
+                print('Jeszcze raz')
+        podsumowaniePunkty()
+        input("Wciśnij Enter")
+        poprawnyWybor = True
+        
+    elif klasa_gracza == "czarodziej":
+        powitanie(nazwa_gracza, klasa_gracza)
+        print('''
+        Podziel 20 punktów umiejętności.
+        Precyzja, Inteligencja, Zdrowie
+        ''')
+        while punkty > 0 or punkty < 0:
+            czysc()
+            punkty, precyzja = przydzielPunkty(punkty, "Precyzja", precyzja)
+            punkty, inteligencja = przydzielPunkty(punkty, "Inteligencja", inteligencja)
+            punkty, zdrowie = przydzielPunkty(punkty, "Zdrowie", zdrowie)
+            if punkty > 0 or punkty < 0:
+                punkty = 20
+                print('Jeszcze raz')
+        podsumowaniePunkty()
+        input("Wciśnij Enter")
+        poprawnyWybor = True
+    else:
+        print('Nie znam tej klasy postaci.')
+        time.sleep(1)
+
+czysc()
+pierwszyPunktFabulyLas()
+gdzieNiedzwiedz = random.randint(1,4)
+szukajNiedzwiedzia(gdzieNiedzwiedz)
+</span></code></pre>
+                        </div>
+                    </article>
+
+                    <!-- ZADANIA DO WYKONANIA -->
+                    <article class="card">
+                        <h2>Zadania do wykonania</h2>
+                        <div class="card-subtitle">
+                            Sekcja do samodzielnej pracy – zadania oparte na kodzie gry z niedźwiedziem.
+                        </div>
+
+                        <div class="card-body">
+                            <!-- LISTA ZADAŃ – EDYTUJ SWOBODNIE -->
+                            <ol class="task-list">
+                                <li>
+                                    <code>Znajdź w kodzie funkcję powitanie()</</code>. Zmień treść komunikatu tak,
+                                    aby wyświetlała dodatkową linię, np. „Przygotuj się na wyprawę do lasu!”.
+                                </li>
+                                <li>
+                                    Odszukaj miejsce, w którym gracz wybiera klasę postaci
+                                    (<code>klasa_gracza = input(...)</code>). Dodaj do komunikatu krótką podpowiedź,
+                                    np. „wojownik – silny, czarodziej – mądry”.
+                                </li>
+                                <li>
+                                    W funkcji <code>szukajNiedzwiedzia()</code> program prosi o kierunek wpisany
+                                    ręcznie.
+                                    Zmień komunikat tak, aby wyraźnie podpowiadał dostępne opcje:
+                                    „północ / południe / wschód / zachód”.
+                                </li>
+                                <li>
+                                    Zmodyfikuj funkcję <code>walkaZNiedzwiedziem()</code> tak, aby po zwycięstwie
+                                    wyświetlała dodatkowe gratulacje z imieniem gracza, np.
+                                    „Brawo, Ania! Niedźwiedź został pokonany.”.
+                                </li>
+                                <li>
+                                    Dodaj prostą walidację kierunku: jeśli gracz wpisze coś innego niż
+                                    „północ”, „południe”, „wschód” lub „zachód”, wyświetl komunikat
+                                    „Nie znam takiego kierunku” i poproś o ponowny wybór.
+                                </li>
+                                <li>
+                                    Rozszerz fabułę w funkcji <code>pierwszyPunktFabulyLas()</code> o 1–2 zdania,
+                                    np. opisz, że w lesie słychać dziwne odgłosy albo że niedźwiedź zostawił ślady.
+                                </li>
+                            </ol>
+
+                            <p class="task-note">
+                                <code>👉 Możesz przygotować osobny plik z rozwiązaniami (np.
+                                solutions.py)</code>
+                            </p>
+                        </div>
+                    </article>
+
+
+                </div>
+
+                <!-- KOLUMNA BOCZNA: meta, linki do repo, notatki -->
+                <aside>
+
+
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container footer-inner">
+            <div>
+                © <span id="year"></span> Moje Kody – podstrona.
+            </div>
+            <div>
+                <!-- Podmień na repo -->
+                <a href="#" target="_blank" rel="noopener"
+                    style="text-decoration: underline; text-decoration-style: dotted;">
+                    Repozytorium GitHub
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Rok w stopce
+        document.getElementById("year").textContent = new Date().getFullYear();
+
+        // Proste menu mobilne
+        const navToggle = document.querySelector(".nav-toggle");
+        const navLinks = document.querySelector(".nav-links");
+
+        navToggle.addEventListener("click", () => {
+            navLinks.classList.toggle("nav-open");
+        });
+    </script>
+</body>
+
+</html>
