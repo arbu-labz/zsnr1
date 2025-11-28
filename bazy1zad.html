@@ -3,9 +3,9 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Python</title>
+    <title>Bazy danych – SQL</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Podstrona z przykładowym kodem i zadaniami do wykonania." />
+    <meta name="description" content="Podstrona z przykładami SQL i zadaniami do wykonania." />
 
     <style>
         :root {
@@ -279,7 +279,13 @@
             padding: 0.85rem 0.9rem;
             font-size: 0.8rem;
             line-height: 1.4;
-            overflow-x: auto;
+            /* KLUCZOWE LINIE: wymuszenie zawijania */
+            white-space: pre-wrap;
+            /* zachowuje formatowanie, ale zawija linie */
+            word-wrap: break-word;
+            /* łamie bardzo długie “słowa” */
+            overflow-wrap: anywhere;
+            /* dodatkowe zabezpieczenie przy długich ciągach */
             background: radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 100%);
             border: 1px solid rgba(15, 23, 42, 0.9);
         }
@@ -414,10 +420,10 @@
     <header class="site-header">
         <div class="container header-inner">
             <div class="logo">
-                <div class="logo-mark">DEV</div>
+                <div class="logo-mark">SQL</div>
                 <div>
                     <div class="logo-text-main">Moje Kody</div>
-                    <div class="logo-text-sub">Podstrona z przykładem</div>
+                    <div class="logo-text-sub">Bazy danych – ćwiczenia</div>
                 </div>
             </div>
 
@@ -427,12 +433,10 @@
 
             <nav>
                 <div class="nav-links">
-                    <!-- Dostosuj ścieżkę, jeśli index.html jest w innym katalogu -->
                     <a href="index.html">Strona główna</a>
                     <a href="index.html#python">Python</a>
                     <a href="index.html#csharp">C#</a>
-                    <a href="index.html#csharp">XAML</a>
-                    <a href="index.html#bd">Bazy danych</a>
+                    <a href="index.html#xaml">XAML</a>
                 </div>
             </nav>
         </div>
@@ -442,193 +446,139 @@
         <div class="container">
             <!-- OKRUCHY PANIERY / BREADCRUMBS -->
             <nav class="breadcrumbs" aria-label="Okruszki nawigacji">
-                <!-- ZMIEŃ NA SWOJE -->
                 <a href="index.html">Strona główna</a> &rsaquo;
-                <span>Python: projektowanie gier 2p</span>
+                <span>Bazy danych: SQL – ćwiczenia</span>
             </nav>
 
             <!-- NAGŁÓWEK PODSTRONY -->
             <header class="page-header">
-
-                <!-- Tytuł konkretnego tematu -->
-                <h1 class="page-title">Python: projektowanie gier 2p</h1>
-
-
+                <div class="page-kicker">Bazy danych</div>
+                <h1 class="page-title">SQL: zadania</h1>
             </header>
 
             <div class="layout-grid">
                 <!-- KOLUMNA GŁÓWNA: opis + kod + zadania -->
                 <div>
-                    <!-- OPIS TEMATU -->
-                    <article class="card">
-                        <h2>Opis</h2>
-                        <div class="card-body">
-                            <!-- TUTAJ WPISZ SWÓJ OPIS -->
-                            <p>
-                               Opis
-                            </p>
-                        </div>
-                    </article>
-
                     <!-- KOD GŁÓWNY -->
                     <article class="card">
-                        <h2>Kod gry</h2>
-
                         <div class="card-body">
+                            <!-- BLOK 1 – PODSTAWOWE OPERACJE NA TABELACH -->
+                             <h3>Blok 1 – PODSTAWOWE ZAPYTANIA SQL</h3>
                             <pre><code>
-<span class="code-str">
-# === SZABLON PROSTY I UNIWERSALNY ===
-# Silnik: ekran(), menu(), scena(), walka()
-# Fabuła: dopisuj kolejne funkcje-scen i dodawaj je do SCENY.
-
-from state import STATE
-from engine import ekran, walka, scena
-
-# ------------------ SCENY (PROSTE FUNKCJE) ------------------
-# Dodajesz kolejne sceny wg wzoru: funkcje i wpis w SCENY.
-
-
-def sc_wejscie():
-    def porozmawiaj():
-        print('\nStary Poszukiwacz: "Bez światła nie idź w prawo."')
-        input("ENTER...")
-
-    def podnies_pochodnie():
-        if "Pochodnia" not in STATE["ekwipunek"]:
-            STATE["ekwipunek"].append("Pochodnia")
-            print("\nPodnosisz: Pochodnia")
-            akcje.remove(("Podnieś pochodnię", podnies_pochodnie))
-            akcje.append(("Idź w prawo", idz_prawo))
-        input("ENTER...")
-
-    def idz_prawo():
-        return "legowisko"
-
-    def idz_lewo():
-        return "korytarz"
-
-    akcje = [("Porozmawiaj", porozmawiaj),
-            ("Idź w lewo", idz_lewo)]
-
-    # Pochodnia / prawy tunel – zależne od stanu ekwipunku:
-    if "Pochodnia" not in STATE["ekwipunek"]:
-        akcje.append(("Podnieś pochodnię", podnies_pochodnie))
-    
-    if "Pochodnia" in STATE["ekwipunek"]:
-        akcje.append(("Idź w prawo", idz_prawo))
-        
-        
-    return scena(
-        "Wejście do jaskini",
-        "Dwa tunele: prawy (ciemny), lewy (wilgotny).",
-        akcje
-    )
-    
-
-def sc_legowisko():
-    def pajak_zabity(akcje):
-        if "pajak" in STATE["defeated"]:
-            akcje.remove(("Walcz z pająkiem", walcz))
-
-    def walcz():
-        hp_g, hp_w = walka("Duży pająk", STATE["hp"], 10)
-        STATE["hp"] = hp_g
-        if STATE["hp"] <= 0:
-            print("\nPrzegrałeś.")
-            input("ENTER...")
-            return None
-        if hp_w > 0:
-            print("\nWalka nie rozstrzygnięta")
-            input("ENTER...")
-            return None
-
-        # — zwycięstwo —
-        STATE["defeated"].add("pajak")
-        print("\nWygrałeś.")
-        pajak_zabity(akcje)
-        input("ENTER...")
-        
-    def wstecz():
-        return "wejscie"
-
-    # AKCJE budujemy WARUNKOWO
-    akcje = []
-    if "pajak" not in STATE["defeated"]:
-        akcje.append(("Walcz z pająkiem", walcz))
-    akcje.append(("Wróć", wstecz))
-
-    opis = "Sieci oplatają ściany."
-    if "pajak" in STATE["defeated"]:
-        opis = "Na ziemi leży martwy pająk.\nSieci oplatają ściany."
-    
-    return scena(
-        "Legowisko pająka",
-        opis,
-        akcje,
-    )
-
-
-def sc_korytarz():
-    def rozejrzyj():
-        print("\nWoda kapie z sufitu. Cicho i zimno.")
-        input("ENTER...")
-    def wstecz():
-        return "wejscie"
-
-    return scena(
-        "Lewy korytarz",
-        "Obskurne pomieszczenie.",
-        [
-            ("Rozejrzyj się", rozejrzyj),
-            ("Wróć", wstecz),
-        ],
-    )
-
-SCENY = {
-    "wejscie": sc_wejscie,
-    "legowisko": sc_legowisko,
-    "korytarz": sc_korytarz,
-}
-
-# ------------------ PĘTLA GŁÓWNA ------------------
-
-def main():
-    STATE["imie"] = input("Podaj imię: ").strip() or "Bezimienny"
-    aktualna = "wejscie"
-    while aktualna and STATE["hp"] > 0:
-        aktualna = SCENY[aktualna]()  
-        # wywołaj funkcję-scenę; dostaniesz klucz następnej
-    ekran("KONIEC", "Dzięki za grę.")
-
-if __name__ == "__main__":
-    main()
-</span></code></pre>
+1.Utwórz tabelę „klienci” z kolumnami:
+identyfikator klienta (typ liczbowy, klucz główny, automatyczne zwiększanie wartości), nazwisko (typ znakowy o długości 30, pole wymagane), rok rejestracji (typ znakowy o długości 4, wartość domyślna „2024”), miasto (typ znakowy o długości 20, wartość domyślna „Dzialdowo”).
+2.Do tabeli „klienci” dodaj kolumnę „wiek” (typ liczbowy, pole wymagane) z ograniczeniem CHECK, że wiek mieści się w przedziale od 18 do 90.
+3.W tabeli „klienci” zmień definicję kolumny „nazwisko” tak, aby miała długość 40 i nadal była polem wymaganym.
+4.W tabeli „klienci” zmień nazwę kolumny „rok rejestracji” na „rok konta”, zachowując dotychczasowy typ i wartość domyślną.
+5.Z tabeli „klienci” usuń kolumnę „miasto”.
+6.Utwórz tabelę „produkty” z kolumnami:
+identyfikator produktu (typ liczbowy, klucz główny, automatyczne zwiększanie wartości), nazwa (typ znakowy o długości 50, pole wymagane), typ (typ znakowy o długości 20, wartość domyślna „inne”).
+7.Do tabeli „produkty” dodaj kolumnę „cena_grosze” (typ liczbowy, pole wymagane) z ograniczeniem CHECK, że wartość nie jest ujemna.
+8.W tabeli „produkty” zmień definicję kolumny „nazwa” tak, aby miała długość 60 i była polem wymaganym.
+9.W tabeli „produkty” zmień nazwę kolumny „typ” na „kategoria”, pozostawiając dotychczasową długość i wartość domyślną.
+10.Z tabeli „produkty” usuń kolumnę „cena_grosze”.
+11.Utwórz tabelę „kursy”, w której identyfikator nie korzysta z automatycznego zwiększania wartości:
+identyfikator kursu (typ liczbowy, klucz główny), tytuł (typ znakowy o długości 40, pole wymagane), rok (typ znakowy o długości 4, wartość domyślna „2024”).
+12.Wstaw do tabeli „kursy” jeden wiersz, ustawiając identyfikator kursu na wartość 0 oraz uzupełniając pola wymagane przykładowymi danymi.
+13.Do tabeli „kursy” dodaj kolumnę „miasto” (typ znakowy o długości 20) z wartością domyślną „Dzialdowo”.
+14.W tabeli „kursy” zmień definicję kolumny „tytuł” tak, aby miała długość 50 i była polem wymaganym.
+15.W tabeli „kursy” zmień nazwę kolumny „rok” na „rok_edycji”, pozostawiając dotychczasowy typ i wartość domyślną.
+16.Z tabeli „kursy” usuń kolumnę „miasto”.
+17.Utwórz tabelę „pracownicy” z kolumnami:
+identyfikator pracownika (typ liczbowy, klucz główny, automatyczne zwiększanie wartości), nazwisko (typ znakowy o długości 30, pole wymagane), rok zatrudnienia (typ znakowy o długości 4, wartość domyślna „2024”), zamieszkanie (typ znakowy o długości 20, wartość domyślna „Dzialdowo”).
+18.Do tabeli „pracownicy” dodaj kolumnę „wiek” (typ liczbowy) z ograniczeniem, że wiek mieści się w przedziale od 18 do 67.
+19.W tabeli „pracownicy” zmodyfikuj kolumnę „rok zatrudnienia”, zmieniając jej wartość domyślną na „2025” (pozostałe właściwości bez zmian).
+20.Wstaw po jednym wierszu do tabel „klienci”, „produkty” i „pracownicy”, podając tylko pola wymagane — sprawdź działanie wartości domyślnych oraz automatycznego zwiększania wartości identyfikatorów.</code></pre>
+                            <!-- BLOK 2 – BAZA sklep (powtórzenie) -->
+                            <h3>Blok 2 – Baza „sklep” (powtórzenie)</h3>
+                            <pre><code>
+1.połączenie z bazą danych w konsoli xampp
+2.pokaż wszystkie dostępne bazy danych
+3.utwórz nową bazę danych o nazwie sklep
+4.użyj bazę danych sklep
+5.stwórz tabelę o nazwie owoce z kolumną id_o typu całkowitego, nie pusty, automatyczne wstawianie kolejnego numeru rekordu, klucz podstawowy
+6.pokaż dostępne tabele w bazie
+7.dodaj kolumnę do tabeli owoce: nazwa typ znakowy ilość znaków 30, nie pusty
+8.dodaj kolumnę do tabeli owoce: jm typ znakowy ilość znaków 3, nie pusty
+9.dodaj kolumnę do tabeli owoce: ilosc typ zmiennoprzecinkowy
+10.dodaj kolumnę do tabeli owoce: cena typ zmiennoprzecinkowy
+11.pokaż kolumny z ich atrybutami w tabeli owoce
+12.wypełnij tabelę owoce danymi, 10 rekordów
+13.stwórz tabelę o nazwie klient z jedną kolumną id_k typu całkowitego, nie pusty, automatyczne wstawianie kolejnego numeru rekordu, klucz podstawowy
+14.dodaj kolumnę do tabeli klient: imie typ znakowy ilość znaków 30, nie pusty
+15.dodaj kolumnę do tabeli klient: nazwisko typ znakowy ilość znaków 30, nie pusty
+16.dodaj kolumnę do tabeli klient: miejscowosc typ znakowy ilość znaków 30, nie pusty
+17.wypełnij tabelę klient danymi, 10 rekordów
+18.wyświetl strukturę tabeli owoce oraz klient
+19.wyświetl dane z tabeli owoce oraz klient
+20.dokonaj zmiany 4 poprzednio wpisanych wartości w tabeli owoce
+21.dokonaj zmiany 4 poprzednio wpisanych wartości w tabeli klient
+22.wyświetl dane z tabeli owoce oraz klient</code></pre>
+                            <!-- BLOK 3 – Zapytania do tabeli pracownik (podstawowe) -->
+                            <h3>Blok 3 – Zapytania do tabeli „pracownik” (podstawowe)</h3>
+                            <pre><code>Zapytania do tabeli pracownik
+========================
+1.Wyświetl wszystkie rekordy z tabeli pracownik.
+2.Wyświetl wszystkie nazwiska pracowników.
+3.Wyświetl nazwiska oraz wynagrodzenia pracowników.
+4.Wyświetl w jakich zawodach pracują pracownicy.
+5.Wyświetl pracownika jako Zatrudniony, wynagrodzenie jako zarabia z tabeli pracownik.
+6.Wyświetl pracownika jako "Zatrudniony", 10 % wynagrodzenia jako "bonus do wynagrodzenia" z tabeli pracownik.
+7.Wyświetl pracowników, których nazwiska są na literę A z tabeli pracownik.
+8.Wyświetl pracowników, którzy mają 4-literowe nazwiska z tabeli pracownik.
+9.Wyświetl pracowników, którzy mają 4-literowe imiona z tabeli pracownik.
+10.Wyświetl pracowników oraz wynagrodzenie z dodatkiem 10 % z tabeli pracownik. 
+====================================================================
+1.Wyświetl wszystkie unikalne nazwy zawodów z kolumny „zadanie”.
+2.Wyświetl pracowników, którzy nie mają przyznanej premii (premia jest pusta).
+3.Wyświetl pracowników, którzy mają przyznaną premię (premia nie jest pusta).
+4.Wyświetl pracowników, których imiona zaczynają się na literę J.
+5.Wyświetl pracowników, których nazwiska kończą się literą N.
+6.Wyświetl pracowników, których nazwiska zawierają ciąg znaków „AR”.
+7.Wyświetl pracowników, którzy mają 5-literowe nazwiska.
+8.Wyświetl pracowników z wydziału 30.
+9.Wyświetl pracowników z wydziału 10 lub 20.
+10.Wyświetl pracowników, których wynagrodzenie mieści się w przedziale od 1000 do 3000 włącznie.
+11.Wyświetl pracowników oraz 15% wynagrodzenia jako „bonus do wynagrodzenia”.
+12.Wyświetl pracowników urodzonych przed rokiem 1990.
+13.Wyświetl pracowników urodzonych w latach 1996–2001 (włącznie).
+14.Wyświetl pracowników, którzy mają premię, oraz sumę wynagrodzenia i premii jako „zarabia łącznie”.
+15.Wyświetl wszystkich pracowników wykonujących zawód „URZEDNIK”.
+16.Wyświetl pracowników, którzy mają 4-literowe imiona i jednocześnie nazwiska zaczynające się na literę J.</code></pre>
+                            <!-- BLOK 4 – Zadanie 1 (zapytania SQL) -->
+                            <h3>Blok 4 – Zadanie 1: zapytania SQL</h3>
+                            <pre><code>
+1.Wyświetlić w jakich zawodach pracują pracownicy.
+2.Wyświetlić nazwiska oraz pensje pracowników z podwyżką 10%.
+3.Wyświetlić nazwiska, pensje oraz 10% wartość pensji jako Premia.
+4.Wyświetlamy pracowników w kolejności alfabetycznej.
+5.Wyświetlamy pracowników oraz ich pensje posortowane od zarabiającego najmniej.
+6.Wyświetl pracowników, pensje, zawód posortowane według kolumny 3.
+7.Wyświetl pracowników, pensje, zawód posortowane według kolumny zawodów, następnie pensji oraz nazwisk.
+8.Wyświetl pracowników pracujących jako “SPRZEDAWCA”.
+9.Wyświetl pracownika pracującego jako “SPRZEDAWCA”, który pobiera największą pensję.
+10.Wyświetl pracowników zarabiających od 1000 do 2000.
+11.Wyświetl nazwisko najlepiej zarabiającego pracownika.
+12.Wyświetl niepowtarzające się wydziały tabeli pracownik.</code></pre>
+                            <!-- BLOK 5 – Zadanie 2 (zapytania SQL) -->
+                            <h3>Blok 5 – Zadanie 2: zapytania SQL</h3>
+                            <pre><code>
+1.Wyświetl pracowników oraz ich zadania posortowane alfabetycznie zadaniami oraz nazwiskami.
+2.Wyświetl pracowników, którzy otrzymują premię.
+3.Wyświetl pracowników, którzy otrzymują premię posortowane wysokością premii.
+4.Wyświetl najstarszego pracownika.
+5.Wyświetl pracowników od najmłodszego do najstarszego.
+6.Wyświetl pracowników, którzy urodzili się między 1980 a 1990 rokiem.
+7.Wyświetl pracowników posortowanych wydziałami.
+8.Wyświetl pracowników pracujących jako "MENEGER" posortowanych zarobkami.
+9.Wyświetl pracowników prcujących jako "MENEGER" w wydziale 20.
+10.Wyświetl nazwiska oraz pensje plus premię pracowników, tych którzy ją dostają.
+INFO:zamiana wartości NULL na liczbę - NVL(premia, 0) - wartość NULL zamieniana jest na 0</code></pre>
                         </div>
                     </article>
-
                     <!-- ZADANIA DO WYKONANIA -->
-                    <article class="card">
-                        <h2>Zadania do wykonania</h2>
-                        <div class="card-subtitle">
-                            Sekcja do samodzielnej pracy.
-                        </div>
-
-                        <div class="card-body">
-                            <!-- LISTA ZADAŃ – EDYTUJ SWOBODNIE -->
-                            <ol class="task-list">
-                                
-                            </ol>
-                        </div>
-                    </article>
-
 
                 </div>
-
-                <!-- KOLUMNA BOCZNA: meta, linki do repo, notatki -->
-                <aside>
-
-
-                </aside>
             </div>
         </div>
     </main>
@@ -639,7 +589,6 @@ if __name__ == "__main__":
                 © <span id="year"></span> Moje Kody – podstrona.
             </div>
             <div>
-                <!-- Podmień na repo -->
                 <a href="#" target="_blank" rel="noopener"
                     style="text-decoration: underline; text-decoration-style: dotted;">
                     Repozytorium GitHub
