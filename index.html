@@ -414,6 +414,13 @@
             margin-bottom: 0.4rem;
         }
 
+        .card-header1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.4rem;
+            color: #f97316;
+        }
         .card-title {
             font-size: 0.95rem;
             font-weight: 550;
@@ -668,8 +675,9 @@
                             </h2>
                             <span class="badge-lang">Python</span>
                         </div>
-                        Wojownik/czarodziej w lesie. 
-                        Walka z niedźwiedziem.
+                        <p class="card-desc">Wojownik/czarodziej w lesie.
+                            Walka z niedźwiedziem.
+                        </p>
                     </article>
                     <article class="card">
                         <div class="card-header">
@@ -678,19 +686,32 @@
                             </h2>
                             <span class="badge-lang">Python</span>
                         </div>
-                        Labirynt, projektowanie.
+                        <p class="card-desc">
+                            Labirynt, projektowanie.
+                        </p>
                     </article>
                     <article class="card">
                         <div class="card-header">
                             <h2 class="card-title">
-                                <a href="python3.html">Tworzenie gier Python</a>
+                                <a href="python3.html">Python: projektowanie gier 2p</a>
                             </h2>
                             <span class="badge-lang">Python</span>
                         </div>
-                        Gra
+                        <p class="card-desc">
+                            Gra
+                        </p>
                     </article>
-
-
+                    <article class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <a href="django4p1.html">Python Django 4p</a>
+                            </h2>
+                            <span class="badge-lang">Python</span>
+                        </div>
+                        <p class="card-desc">
+                            Wprowadzenie do frameworka Django
+                        </p>
+                    </article>
                 </div>
             </div>
         </section>
@@ -700,108 +721,31 @@
             <div class="container">
                 <div class="section-header">
                     <div>
-                        <div class="section-title">C#</div>
-                        <div class="section-subtitle">Fragmenty pod aplikacje konsolowe i nie tylko.</div>
+                        <div class="section-title">C#, XAML</div>
+                        <div class="section-subtitle">Fragmenty pod aplikacje mobilne, desktopowe, konsolowe.</div>
                     </div>
 
                 </div>
 
                 <div class="grid grid-2">
                     <article class="card">
+                        <div class="card-header1">Aplikacje mobilne</div>
                         <div class="card-header">
-                            <h2 class="card-title">Hello World (konsola)</h2>
-                            <span class="badge-lang">C#</span>
+                            <a href="listview.pdf" class="btn-link">
+                                przykład ListView
+                            </a>
+                            <h2 class="card-title"></h2>
+                            <span class="badge-lang">C#, XAML</span>
+
                         </div>
+
                         <p class="card-desc">
-                            Klasyczny przykład w nowoczesnej składni C#.
+                            Aplikacje mobilne
                         </p>
-                        <pre><code>Console.WriteLine("Hello, World!");</code></pre>
-                        <div class="card-meta">
-                            <div class="tag-row">
-                                <span class="tag">Console</span>
-                                <span class="tag">.NET</span>
-                            </div>
-                            <span>Poziom: 🟢</span>
-                        </div>
+
                     </article>
 
-                    <article class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Mała klasa z właściwościami</h2>
-                            <span class="badge-lang">C#</span>
-                        </div>
-                        <p class="card-desc">
-                            Przykład prostego modelu danych z inicjalizatorem obiektu.
-                        </p>
-                        <pre><code>public class Osoba
-{
-    public string Imie { get; set; } = "";
-    public int Wiek { get; set; }
-}</code></pre>
-                        <div class="card-meta">
-                            <div class="tag-row">
-                                <span class="tag">class</span>
-                                <span class="tag">properties</span>
-                            </div>
-                            <span>Poziom: 🟡</span>
-                        </div>
-                    </article>
-                </div>
-            </div>
-        </section>
 
-        <!-- XAML -->
-        <section id="xaml">
-            <div class="container">
-                <div class="section-header">
-                    <div>
-                        <div class="section-title">XAML</div>
-                        <div class="section-subtitle">Widoki, kontrolki, bindowanie danych.</div>
-                    </div>
-
-                </div>
-
-                <div class="grid grid-2">
-                    <article class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Przykładowy przycisk</h2>
-                            <span class="badge-lang">XAML</span>
-                        </div>
-                        <p class="card-desc">
-                            Prosty przycisk z tekstem i marginesem.
-                        </p>
-                        <pre><code>&lt;Button Content="Kliknij mnie"
-        Margin="8"
-        Padding="12,6"/&gt;</code></pre>
-                        <div class="card-meta">
-                            <div class="tag-row">
-                                <span class="tag">Button</span>
-                                <span class="tag">Layout</span>
-                            </div>
-                            <span>Poziom: 🟢</span>
-                        </div>
-                    </article>
-
-                    <article class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">StackPanel pionowy</h2>
-                            <span class="badge-lang">XAML</span>
-                        </div>
-                        <p class="card-desc">
-                            Ułożenie kilku elementów w kolumnie.
-                        </p>
-                        <pre><code>&lt;StackPanel Orientation="Vertical"&gt;
-    &lt;TextBlock Text="Nagłówek" FontSize="18"/&gt;
-    &lt;Button Content="OK"/&gt;
-&lt;/StackPanel&gt;</code></pre>
-                        <div class="card-meta">
-                            <div class="tag-row">
-                                <span class="tag">StackPanel</span>
-                                <span class="tag">TextBlock</span>
-                            </div>
-                            <span>Poziom: 🟢</span>
-                        </div>
-                    </article>
                 </div>
             </div>
         </section>
