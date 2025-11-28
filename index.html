@@ -3,616 +3,250 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Moje Kody – Python, C#, XAML</title>
+    <title>Python, C#, XAML</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Prezentacja przykładów kodu w Pythonie, C# i XAML oraz krótkich artykułów." />
-
-    <style>
-        :root {
-            --bg: #0f172a;
-            --bg-alt: #111827;
-            --card-bg: #020617;
-            --accent: #38bdf8;
-            --accent-soft: rgba(56, 189, 248, 0.15);
-            --text: #e5e7eb;
-            --muted: #9ca3af;
-            --border: #1f2937;
-            --radius-lg: 18px;
-            --radius-xl: 24px;
-            --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.7);
-            --shadow-subtle: 0 10px 30px rgba(15, 23, 42, 0.6);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
-            color: var(--text);
-            min-height: 100vh;
-        }
-
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1120px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-        }
-
-        /* HEADER */
-
-        .site-header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            backdrop-filter: blur(18px);
-            background: linear-gradient(to bottom,
-                    rgba(15, 23, 42, 0.96),
-                    rgba(15, 23, 42, 0.8),
-                    transparent);
-            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-        }
-
-        .header-inner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.9rem 0;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-
-        .logo-mark {
-            width: 34px;
-            height: 34px;
-            border-radius: 999px;
-            background: radial-gradient(circle at 30% 0, #e0f2fe, #38bdf8 40%, #0f172a 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.55);
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #0f172a;
-        }
-
-        .logo-text-main {
-            font-weight: 600;
-            letter-spacing: 0.04em;
-            font-size: 0.95rem;
-        }
-
-        .logo-text-sub {
-            font-size: 0.75rem;
-            color: var(--muted);
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .nav-links a {
-            padding: 0.45rem 0.9rem;
-            border-radius: 999px;
-            border: 1px solid transparent;
-            color: var(--muted);
-            transition: 0.15s ease;
-        }
-
-        .nav-links a:hover {
-            color: #f9fafb;
-            border-color: rgba(148, 163, 184, 0.6);
-            background: rgba(15, 23, 42, 0.9);
-        }
-
-        .nav-links a.nav-cta {
-            border-color: rgba(56, 189, 248, 0.7);
-            background: linear-gradient(120deg, #0ea5e9, #22d3ee);
-            color: #0b1120;
-            font-weight: 600;
-            padding-inline: 1.2rem;
-            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.5);
-        }
-
-        .nav-links a.nav-cta:hover {
-            filter: brightness(1.05);
-        }
-
-        .nav-toggle {
-            display: none;
-            background: none;
-            border: 1px solid rgba(148, 163, 184, 0.7);
-            border-radius: 999px;
-            padding: 0.35rem 0.55rem;
-            color: var(--text);
-            cursor: pointer;
-        }
-
-        .nav-toggle span {
-            display: block;
-            width: 18px;
-            height: 2px;
-            margin: 3px 0;
-            background: var(--text);
-            border-radius: 999px;
-        }
-
-        /* HERO */
-
-        main {
-            padding-bottom: 3rem;
-        }
-
-        .hero {
-            padding: 3.5rem 0 2rem;
-        }
-
-        .hero-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .hero-kicker {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
-            color: var(--muted);
-            margin-bottom: 0.8rem;
-        }
-
-        .hero-title {
-            font-size: clamp(2.1rem, 3vw, 2.7rem);
-            font-weight: 650;
-            line-height: 1.1;
-            margin-bottom: 1rem;
-        }
-
-        .hero-title span {
-            background: linear-gradient(120deg, #38bdf8, #f97316);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .hero-subtitle {
-            font-size: 0.98rem;
-            color: var(--muted);
-            max-width: 34rem;
-        }
-
-        .hero-actions {
-            margin-top: 1.6rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            align-items: center;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.65rem 1.2rem;
-            border-radius: 999px;
-            border: 1px solid transparent;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: 0.15s ease-in-out;
-            text-decoration: none;
-            white-space: nowrap;
-        }
-
-        .btn-primary {
-            background: linear-gradient(120deg, #0ea5e9, #22c55e);
-            color: #0b1120;
-            font-weight: 600;
-            box-shadow: var(--shadow-subtle);
-        }
-
-        .btn-primary:hover {
-            filter: brightness(1.08);
-            transform: translateY(-1px);
-        }
-
-        .btn-ghost {
-            background: rgba(15, 23, 42, 0.8);
-            color: var(--muted);
-            border-color: rgba(148, 163, 184, 0.5);
-        }
-
-        .btn-ghost:hover {
-            color: #f9fafb;
-            border-color: rgba(148, 163, 184, 0.9);
-            background: rgba(15, 23, 42, 0.95);
-        }
-
-        .hero-meta {
-            margin-top: 0.7rem;
-            font-size: 0.8rem;
-            color: var(--muted);
-        }
-
-        /* Hero code preview */
-
-        .hero-card {
-            background: radial-gradient(circle at top, #1f2937 0, #020617 50%);
-            border-radius: var(--radius-xl);
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            box-shadow: var(--shadow-soft);
-            padding: 1.1rem 1.2rem;
-        }
-
-        .hero-card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 0.8rem;
-        }
-
-        .hero-card-tabs {
-            display: flex;
-            gap: 0.35rem;
-            font-size: 0.7rem;
-        }
-
-        .hero-card-tab {
-            padding: 0.25rem 0.65rem;
-            border-radius: 999px;
-            border: 1px solid transparent;
-            background: rgba(15, 23, 42, 0.9);
-            color: var(--muted);
-        }
-
-        .hero-card-tab.active {
-            background: rgba(56, 189, 248, 0.1);
-            color: #e0f2fe;
-            border-color: rgba(56, 189, 248, 0.6);
-        }
-
-        .hero-card-dots {
-            display: flex;
-            gap: 0.25rem;
-        }
-
-        .hero-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 999px;
-            background: #4b5563;
-        }
-
-        .hero-dot:nth-child(1) {
-            background: #ef4444;
-        }
-
-        .hero-dot:nth-child(2) {
-            background: #facc15;
-        }
-
-        .hero-dot:nth-child(3) {
-            background: #22c55e;
-        }
-
-        pre {
-            margin: 0;
-            border-radius: 0.75rem;
-            padding: 0.85rem 0.9rem;
-            font-size: 0.8rem;
-            line-height: 1.4;
-            overflow-x: auto;
-            background: radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 100%);
-            border: 1px solid rgba(15, 23, 42, 0.9);
-        }
-
-        code {
-            font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            color: #e5e7eb;
-        }
-
-        .code-comment {
-            color: #6b7280;
-        }
-
-        .code-kw {
-            color: #22c55e;
-        }
-
-        .code-fn {
-            color: #38bdf8;
-        }
-
-        .code-str {
-            color: #f97316;
-        }
-
-        .code-type {
-            color: #a855f7;
-        }
-
-        /* SECTIONS */
-
-        section {
-            padding: 2.5rem 0 1rem;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 1.4rem;
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        .section-subtitle {
-            font-size: 0.85rem;
-            color: var(--muted);
-        }
-
-        .pill {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.7rem;
-            border-radius: 999px;
-            border: 1px solid rgba(148, 163, 184, 0.5);
-            color: var(--muted);
-        }
-
-        .grid {
-            display: grid;
-            gap: 1.1rem;
-        }
-
-        @media (min-width: 768px) {
-            .grid-3 {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-
-            .grid-2 {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-
-        .card {
-            background: radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 100%);
-            border-radius: var(--radius-lg);
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            padding: 0.9rem 1rem;
-            box-shadow: var(--shadow-subtle);
-            transition: 0.15s ease-out;
-        }
-
-        .card-image-only {
-            padding: 0;
-            /* bez wewnętrznego marginesu */
-            overflow: hidden;
-            /* żeby obrazek ładnie kopiował zaokrąglenie */
-        }
-
-        /* Obrazek w karcie */
-        .card-image-only .card-image {
-            display: block;
-            width: 100%;
-            height: 100%;
-            max-height: 200px;
-            /* możesz zmienić wysokość */
-            object-fit: cover;
-            /* przycina obrazek, ale wypełnia kartę */
-            border-radius: inherit;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 35px rgba(15, 23, 42, 0.8);
-            border-color: rgba(56, 189, 248, 0.7);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.4rem;
-        }
-
-        .card-header1 {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.4rem;
-            color: #f97316;
-        }
-
-        .card-title {
-            font-size: 0.95rem;
-            font-weight: 550;
-        }
-
-        .badge-lang {
-            font-size: 0.7rem;
-            padding: 0.15rem 0.5rem;
-            border-radius: 999px;
-            border: 1px solid rgba(148, 163, 184, 0.5);
-            background: rgba(15, 23, 42, 0.95);
-            color: var(--muted);
-        }
-
-        .card-desc {
-            font-size: 0.8rem;
-            color: var(--muted);
-            margin-bottom: 0.6rem;
-        }
-
-        .card-meta {
-            font-size: 0.7rem;
-            color: var(--muted);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .tag-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.3rem;
-        }
-
-        .tag {
-            font-size: 0.7rem;
-            padding: 0.1rem 0.45rem;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.95);
-            border: 1px solid rgba(31, 41, 55, 0.9);
-            color: var(--muted);
-        }
-
-        /* ABOUT */
-
-        .about-wrapper {
-            display: grid;
-            grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-            gap: 1.5rem;
-        }
-
-        .about-text {
-            font-size: 0.9rem;
-            color: var(--muted);
-        }
-
-        .stack-list {
-            list-style: none;
-            padding: 0;
-            margin: 0.5rem 0 0;
-            font-size: 0.85rem;
-        }
-
-        .stack-list li::before {
-            content: "•";
-            margin-right: 0.4rem;
-            color: var(--accent);
-        }
-
-        .about-card {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            padding: 0.8rem 1rem;
-            font-size: 0.8rem;
-        }
-
-        .about-card h3 {
-            margin-top: 0;
-            margin-bottom: 0.4rem;
-            font-size: 0.9rem;
-        }
-
-        .about-card p {
-            margin: 0.2rem 0;
-        }
-
-        /* FOOTER */
-
-        footer {
-            border-top: 1px solid rgba(148, 163, 184, 0.3);
-            padding: 1.2rem 0 1.6rem;
-            font-size: 0.8rem;
-            color: var(--muted);
-        }
-
-        .footer-inner {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 0.8rem;
-            align-items: center;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 0.8rem;
-        }
-
-        .footer-links a {
-            text-decoration: underline;
-            text-decoration-style: dotted;
-        }
-
-        /* RESPONSIVE */
-
-        @media (max-width: 768px) {
-
-            .hero-grid,
-            .about-wrapper {
-                grid-template-columns: minmax(0, 1fr);
-            }
-
-            .hero {
-                padding-top: 2.4rem;
-            }
-
-            .header-inner {
-                padding-block: 0.6rem;
-            }
-
-            .nav-toggle {
-                display: inline-flex;
-                flex-direction: column;
-            }
-
-            .nav-links {
-                position: fixed;
-                inset-inline: 1.5rem;
-                top: 3.1rem;
-                flex-direction: column;
-                padding: 0.8rem;
-                background: rgba(15, 23, 42, 0.98);
-                border-radius: 1.2rem;
-                border: 1px solid rgba(148, 163, 184, 0.4);
-                box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
-                transform-origin: top center;
-                transform: scaleY(0.6);
-                opacity: 0;
-                pointer-events: none;
-                transition: 0.15s ease-out;
-            }
-
-            .nav-links.nav-open {
-                opacity: 1;
-                transform: scaleY(1);
-                pointer-events: auto;
-            }
-
-            .nav-links a {
-                width: 100%;
-                text-align: center;
-            }
-
-            .hero-card {
-                order: -1;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="stylemg.css">
 </head>
 
 <body>
+    <script>
+        (function () {
+            // Pomocnicza funkcja do pobierania elementów
+            function $(id) {
+                return document.getElementById(id);
+            }
+
+            // Zmienne, które wypełnimy DOPIERO po załadowaniu DOM
+            var sliders = {};
+            var labels = {};
+            var resultBox;
+            var scoreNumber;
+            var modeLabel;
+            var adviceText;
+
+            // Bezpieczne podpinanie zdarzeń (również na starszych przeglądarkach)
+            function addEvent(el, type, handler) {
+                if (!el) return;
+                if (el.addEventListener) {
+                    el.addEventListener(type, handler, false);
+                } else if (el.attachEvent) {
+                    el.attachEvent("on" + type, handler);
+                } else {
+                    el["on" + type] = handler;
+                }
+            }
+
+            function commentSleep(h) {
+                if (h <= 3) return "– prawie bez snu 😵";
+                if (h <= 5) return "– mało snu 😬";
+                if (h <= 7.5) return "– całkiem ok 🙂";
+                if (h <= 9) return "– bardzo dobrze 😌";
+                return "– może trochę za dużo 😅";
+            }
+
+            function commentScale(x) {
+                if (x <= 2) return "– bardzo nisko";
+                if (x <= 4) return "– raczej słabo";
+                if (x <= 7) return "– w porządku";
+                if (x <= 9) return "– mocny poziom";
+                return "– turbo poziom 🚀";
+            }
+
+            function commentStress(x) {
+                if (x <= 2) return "– totalny chill 😎";
+                if (x <= 4) return "– lekka mobilizacja";
+                if (x <= 7) return "– spory stres, uważaj";
+                return "– bardzo duży stres 😰";
+            }
+
+            // Liczenie wyniku 0–100
+            function calculateScore(values) {
+                var sleep = values.sleep;
+                var energy = values.energy;
+                var mood = values.mood;
+                var stress = values.stress;
+                var env = values.env;
+                var motivation = values.motivation;
+
+                // Sen – optymalne ~8h
+                var sleepDiff = Math.abs(sleep - 8);
+                var sleepNorm = 1 - sleepDiff / 6;
+                if (sleepNorm < 0) sleepNorm = 0;
+                if (sleepNorm > 1) sleepNorm = 1;
+
+                var energyNorm = energy / 10;
+                var moodNorm = mood / 10;
+                var envNorm = env / 10;
+                var motivationNorm = motivation / 10;
+
+                // Stres – najlepiej średni
+                var stressNorm = stress / 10;
+                var stressEffect = 1 - Math.abs(stressNorm - 0.5) * 1.6;
+                if (stressEffect < 0) stressEffect = 0;
+                if (stressEffect > 1) stressEffect = 1;
+
+                // Wagi
+                var wSleep = 0.23;
+                var wEnergy = 0.22;
+                var wMood = 0.18;
+                var wEnv = 0.14;
+                var wMotivation = 0.13;
+                var wStress = 0.10;
+
+                var rawScore =
+                    (sleepNorm * wSleep +
+                        energyNorm * wEnergy +
+                        moodNorm * wMood +
+                        envNorm * wEnv +
+                        motivationNorm * wMotivation +
+                        stressEffect * wStress) *
+                    100;
+
+                var finalScore = Math.round(Math.max(20, rawScore));
+                return finalScore;
+            }
+
+            function getModeAndAdvice(score) {
+                if (score >= 80) {
+                    return {
+                        mode: "ll-mode-hard",
+                        label: "TRYB: HARD MODE",
+                        text:
+                            "Masz bardzo dobry dzień na naukę! 💪 To świetny moment na trudniejsze zadania: nowy materiał, większe projekty, ambitne zadania z programowania.",
+                    };
+                } else if (score >= 60) {
+                    return {
+                        mode: "ll-mode-normal",
+                        label: "TRYB: NORMAL",
+                        text:
+                            "Dobry moment na zwykłą naukę: powtórki, zadania domowe, ćwiczenia z programowania. Krok po kroku ogarniaj materiał.",
+                    };
+                } else if (score >= 40) {
+                    return {
+                        mode: "ll-mode-chill",
+                        label: "TRYB: CHILL LEARNING",
+                        text:
+                            "Lżejszy dzień – wybierz krótsze sesje: fiszki, szybkie powtórki, małe fragmenty kodu. Lepiej zrobić trochę niż nic. 🙂",
+                    };
+                } else {
+                    return {
+                        mode: "ll-mode-minimal",
+                        label: "TRYB: MINI KROK",
+                        text:
+                            "To trudniejszy dzień. Zrób coś bardzo małego: uporządkuj notatki, zaplanuj jutro, powtórz 1–2 rzeczy. Każdy mini krok ma znaczenie. 🌱",
+                    };
+                }
+            }
+
+            function updateLabels(values) {
+                labels.sleepValue.textContent = values.sleep;
+                labels.sleepComment.textContent = commentSleep(values.sleep);
+
+                labels.energyValue.textContent = values.energy;
+                labels.energyComment.textContent = commentScale(values.energy);
+
+                labels.moodValue.textContent = values.mood;
+                labels.moodComment.textContent = commentScale(values.mood);
+
+                labels.stressValue.textContent = values.stress;
+                labels.stressComment.textContent = commentStress(values.stress);
+
+                labels.envValue.textContent = values.env;
+                labels.envComment.textContent = commentScale(values.env);
+
+                labels.motivationValue.textContent = values.motivation;
+                labels.motivationComment.textContent = commentScale(values.motivation);
+            }
+
+            function updateUI() {
+                var values = {
+                    sleep: parseFloat(sliders.sleep.value),
+                    energy: parseInt(sliders.energy.value, 10),
+                    mood: parseInt(sliders.mood.value, 10),
+                    stress: parseInt(sliders.stress.value, 10),
+                    env: parseInt(sliders.env.value, 10),
+                    motivation: parseInt(sliders.motivation.value, 10),
+                };
+
+                updateLabels(values);
+
+                var score = calculateScore(values);
+                var modeInfo = getModeAndAdvice(score);
+
+                scoreNumber.textContent = String(score);
+                modeLabel.textContent = modeInfo.label;
+                adviceText.textContent = modeInfo.text;
+
+                // Reset klas trybów
+                resultBox.className = resultBox.className
+                    .replace("ll-mode-hard", "")
+                    .replace("ll-mode-normal", "")
+                    .replace("ll-mode-chill", "")
+                    .replace("ll-mode-minimal", "");
+                // dodaj aktualny tryb
+                if (resultBox.className.indexOf(modeInfo.mode) === -1) {
+                    resultBox.className += " " + modeInfo.mode;
+                }
+            }
+
+            // Funkcja, która rusza dopiero gdy DOM jest gotowy
+            function attachEventsAndInit() {
+                // Pobieramy elementy TERAZ, gdy DOM już jest
+                sliders = {
+                    sleep: $("ll-sleep"),
+                    energy: $("ll-energy"),
+                    mood: $("ll-mood"),
+                    stress: $("ll-stress"),
+                    env: $("ll-env"),
+                    motivation: $("ll-motivation"),
+                };
+
+                labels = {
+                    sleepValue: $("ll-sleep-value"),
+                    sleepComment: $("ll-sleep-comment"),
+                    energyValue: $("ll-energy-value"),
+                    energyComment: $("ll-energy-comment"),
+                    moodValue: $("ll-mood-value"),
+                    moodComment: $("ll-mood-comment"),
+                    stressValue: $("ll-stress-value"),
+                    stressComment: $("ll-stress-comment"),
+                    envValue: $("ll-env-value"),
+                    envComment: $("ll-env-comment"),
+                    motivationValue: $("ll-motivation-value"),
+                    motivationComment: $("ll-motivation-comment"),
+                };
+
+                resultBox = $("ll-result");
+                scoreNumber = $("ll-score-number");
+                modeLabel = $("ll-mode-label");
+                adviceText = $("ll-advice-text");
+
+                // Podpinamy zdarzenia do suwaków
+                for (var key in sliders) {
+                    if (sliders.hasOwnProperty(key)) {
+                        addEvent(sliders[key], "input", updateUI);
+                        addEvent(sliders[key], "change", updateUI); // na wszelki wypadek
+                    }
+                }
+
+                // Pierwsze przeliczenie
+                updateUI();
+            }
+
+            // Czekamy na załadowanie DOM (różne przeglądarki)
+            if (document.readyState === "complete" || document.readyState === "interactive") {
+                // DOM już jest gotowy
+                attachEventsAndInit();
+            } else if (document.addEventListener) {
+                document.addEventListener("DOMContentLoaded", attachEventsAndInit);
+                addEvent(window, "load", attachEventsAndInit);
+            } else {
+                // Bardzo stare przeglądarki
+                addEvent(window, "load", attachEventsAndInit);
+            }
+        })();
+    </script>
     <header class="site-header">
         <div class="container header-inner">
             <div class="logo">
@@ -632,7 +266,7 @@
                     <a href="#python">Python</a>
                     <a href="#csharp">C#</a>
                     <a href="#csharp">XAML</a>
-                    <a href="#bd">Bazy danych</a>
+                    <a href="#csharp">Bazy danych</a>
                 </div>
             </nav>
         </div>
@@ -652,27 +286,20 @@
                     </div>
                 </div>
 
-                <aside class="hero-card" aria-label="Podgląd przykładowego kodu">
-                    <div class="hero-card-header">
-                        <div class="hero-card-tabs">
-                            <span class="hero-card-tab active">python_demo.py</span>
-                            <span class="hero-card-tab">Program.cs</span>
-                            <span class="hero-card-tab">MainPage.xaml</span>
-                        </div>
-                        <div class="hero-card-dots">
-                            <span class="hero-dot"></span>
-                            <span class="hero-dot"></span>
-                            <span class="hero-dot"></span>
+                <aside class="hero-card" aria-label="Mini-gra z programowania">
+                    <div class="mch-header-row">
+                        <div class="mch-xp-badge">
+                            <span>Twój XP:</span>
+                            <span class="mch-xp-value" id="mch-xp-display">0</span>
+                            <span class="mch-xp-status" id="mch-xp-status"></span>
                         </div>
                     </div>
-                    <pre><code><span class="code-comment"># Prosty przykład w Pythonie</span>
-<span class="code-kw">def</span> <span class="code-fn">powitanie</span>(imie: <span class="code-type">str</span>) -&gt; <span class="code-type">str</span>:
-    <span class="code-str">"""Zwraca spersonalizowane powitanie."""</span>
-    <span class="code-kw">return</span> <span class="code-str">f"Cześć, {imie}! 👋"</span>
 
-
-<span class="code-kw">if</span> __name__ == <span class="code-str">"__main__"</span>:
-    print(powitanie(<span class="code-str">"Kevin"</span>))</code></pre>
+                    <div class="mch-shell">
+                        <div class="mch-shell-body" id="mch-game-root">
+                            <!-- Tutaj JS wstawi wylosowaną mini-grę -->
+                        </div>
+                    </div>
                 </aside>
             </div>
         </section>
@@ -762,13 +389,14 @@
             </div>
         </section>
 
-        <!-- C#, XAML -->
+        <!-- C#, XAML, SQL -->
         <section id="csharp">
             <div class="container">
                 <div class="section-header">
                     <div>
-                        <div class="section-title">C#, XAML</div>
-                        <div class="section-subtitle">Fragmenty pod aplikacje mobilne, desktopowe, konsolowe.</div>
+                        <div class="section-title">C#, XAML, SQL</div>
+                        <div class="section-subtitle">Fragmenty pod aplikacje mobilne, desktopowe, konsolowe. Zapytania,
+                            polecenia, struktury.</div>
                     </div>
                 </div>
                 <div class="grid grid-2">
@@ -785,22 +413,8 @@
                             Aplikacje mobilne
                         </p>
                     </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- BAZY DANYCH, SQL -->
-        <section id="bd">
-            <div class="container">
-                <div class="section-header">
-                    <div>
-                        <div class="section-title">Bazy danych, SQL</div>
-                        <div class="section-subtitle">Zapytania, polecenia, struktury</div>
-                    </div>
-                </div>
-                <div class="grid grid-2">
                     <article class="card">
-                        <div class="card-header1">SQL</div>
+                        <div class="card-header1">Bazy danych, SQL</div>
                         <div class="card-header">
                             <a href="bazy1.html" class="btn-link">
                                 struktury zapytań SQL
@@ -819,6 +433,121 @@
                             Bazy danych, SQL
                         </p>
                     </article>
+                </div>
+            </div>
+        </section>
+
+
+        <section class="learning-lab" id="learning-lab">
+            <h2>Laboratorium Nauki</h2>
+            <p class="ll-subtitle">
+                Pobaw się suwakami i zobacz, jaki tryb nauki będzie dziś dla Ciebie najlepszy.
+                To nie jest test – to tylko pomoc w planowaniu dnia. 💡
+            </p>
+
+            <div class="ll-content">
+                <div class="ll-sliders">
+                    <!-- Sen -->
+                    <div class="ll-field">
+                        <div class="ll-label-row">
+                            <div class="ll-label-main">
+                                <span class="ll-emoji">😴</span> Sen (godziny)
+                            </div>
+                            <div class="ll-value">
+                                <strong><span id="ll-sleep-value">7</span>h</strong>
+                                <span id="ll-sleep-comment">– całkiem ok</span>
+                            </div>
+                        </div>
+                        <input id="ll-sleep" class="ll-slider" type="range" min="0" max="12" step="0.5" value="7" />
+                    </div>
+
+                    <!-- Energia -->
+                    <div class="ll-field">
+                        <div class="ll-label-row">
+                            <div class="ll-label-main">
+                                <span class="ll-emoji">🔋</span> Energia
+                            </div>
+                            <div class="ll-value">
+                                <strong><span id="ll-energy-value">7</span>/10</strong>
+                                <span id="ll-energy-comment">– jest paliwo</span>
+                            </div>
+                        </div>
+                        <input id="ll-energy" class="ll-slider" type="range" min="0" max="10" step="1" value="7" />
+                    </div>
+
+                    <!-- Nastrój -->
+                    <div class="ll-field">
+                        <div class="ll-label-row">
+                            <div class="ll-label-main">
+                                <span class="ll-emoji">🙂</span> Nastrój
+                            </div>
+                            <div class="ll-value">
+                                <strong><span id="ll-mood-value">7</span>/10</strong>
+                                <span id="ll-mood-comment">– pozytywnie</span>
+                            </div>
+                        </div>
+                        <input id="ll-mood" class="ll-slider" type="range" min="0" max="10" step="1" value="7" />
+                    </div>
+
+                    <!-- Stres -->
+                    <div class="ll-field">
+                        <div class="ll-label-row">
+                            <div class="ll-label-main">
+                                <span class="ll-emoji">💥</span> Stres
+                            </div>
+                            <div class="ll-value">
+                                <strong><span id="ll-stress-value">4</span>/10</strong>
+                                <span id="ll-stress-comment">– lekka mobilizacja</span>
+                            </div>
+                        </div>
+                        <input id="ll-stress" class="ll-slider" type="range" min="0" max="10" step="1" value="4" />
+                    </div>
+
+                    <!-- Warunki do nauki -->
+                    <div class="ll-field">
+                        <div class="ll-label-row">
+                            <div class="ll-label-main">
+                                <span class="ll-emoji">📚</span> Warunki do nauki
+                            </div>
+                            <div class="ll-value">
+                                <strong><span id="ll-env-value">7</span>/10</strong>
+                                <span id="ll-env-comment">– całkiem sprzyjające</span>
+                            </div>
+                        </div>
+                        <input id="ll-env" class="ll-slider" type="range" min="0" max="10" step="1" value="7" />
+                    </div>
+
+                    <!-- Motywacja -->
+                    <div class="ll-field">
+                        <div class="ll-label-row">
+                            <div class="ll-label-main">
+                                <span class="ll-emoji">🎯</span> Motywacja
+                            </div>
+                            <div class="ll-value">
+                                <strong><span id="ll-motivation-value">6</span>/10</strong>
+                                <span id="ll-motivation-comment">– da się działać</span>
+                            </div>
+                        </div>
+                        <input id="ll-motivation" class="ll-slider" type="range" min="0" max="10" step="1" value="6" />
+                    </div>
+                </div>
+
+                <div class="ll-result ll-mode-normal" id="ll-result">
+                    <div class="ll-score-ring">
+                        <div>
+                            <span class="ll-score-number" id="ll-score-number">72</span><span
+                                class="ll-score-percent">%</span>
+                        </div>
+                    </div>
+                    <div class="ll-mode-label" id="ll-mode-label">TRYB: NORMAL</div>
+                    <p class="ll-advice" id="ll-advice-text">
+                        Dobry moment na zwykłą naukę: powtórki, zadania domowe, ćwiczenia z
+                        programowania. Wykorzystaj ten dzień na spokojne ogarnianie materiału.
+                    </p>
+                    <p class="ll-disclaimer">
+                        To tylko wskazówka – każdy czas jest dobry, żeby zrobić choć mały krok
+                        do przodu. 🌱
+                    </p>
                 </div>
             </div>
         </section>
@@ -844,6 +573,7 @@
             navLinks.classList.toggle("nav-open");
         });
     </script>
+    <script src="minigame.js"></script>
 </body>
 
 </html>
