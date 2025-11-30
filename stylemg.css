@@ -1055,3 +1055,174 @@ footer {
         padding: 0.9rem;
     }
 }
+
+/* BLOK INFORMACJI DNIA */
+
+.info-dnia {
+    margin: 1.5rem 0 2rem;
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    background: #0b1120;
+    /* bardzo ciemny granat/szarość */
+    color: #e5e7eb;
+    /* jasny tekst */
+    border-left: 4px solid #22c55e;
+    /* delikatny „zielony” akcent */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+/* KOD – monospace, lekkie „okienko terminala” */
+
+#info-dnia-kod {
+    margin: 0;
+    padding: 0.75rem 0.85rem;
+    border-radius: 8px;
+    background: #020617;
+    /* jeszcze ciemniejsze tło pod kod */
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    overflow-x: auto;
+    white-space: pre;
+}
+
+/* Drobna poprawka wyglądu na małych ekranach */
+
+@media (max-width: 640px) {
+    .info-dnia {
+        padding: 0.85rem 0.9rem;
+    }
+
+    #info-dnia-kod {
+        font-size: 0.85rem;
+    }
+}
+
+/* === CYBERPUNKOWA INFORMACJA DNIA === */
+
+:root {
+    --neon-green: #22c55e;
+    --neon-cyan: #0ea5e9;
+    --neon-purple: #a855f7;
+    --panel-bg: #020617;
+}
+
+/* zewnętrzny panel z animowaną neonową ramką */
+.info-dnia {
+    position: relative;
+    margin: 1.75rem 0 2.25rem;
+    padding: 1.3rem 1.6rem;
+    border-radius: 18px;
+    background: radial-gradient(circle at top left, #0f172a, #020617 55%, #000 100%);
+    color: #e5e7eb;
+    overflow: hidden;
+}
+
+/* KOD – trochę spokojniejszy, żeby opis był bohaterem */
+#info-dnia-kod {
+    margin: 0;
+    padding: 0.85rem 1rem;
+    border-radius: 14px;
+    background: #020617;
+    border: 1px solid rgba(30, 64, 175, 0.9);
+    box-shadow:
+        0 0 0 1px rgba(15, 23, 42, 0.9),
+        0 18px 35px rgba(0, 0, 0, 0.85);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: #e5e7eb;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+/* neonowa poświata / ramka */
+.info-dnia::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(120deg,
+            var(--neon-green),
+            var(--neon-cyan),
+            var(--neon-purple),
+            #f97316,
+            var(--neon-green));
+    opacity: 0.75;
+    z-index: -1;
+    filter: blur(6px);
+    background-size: 200% 200%;
+    animation: infoGlow 6s linear infinite;
+}
+
+/* OPIS – główny „wow” */
+
+#info-dnia-opis {
+    position: relative;
+    margin: 0.1rem 0 1.05rem;
+    padding-left: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.5;
+    /* animowany gradient w tekście */
+    background-image: linear-gradient(120deg,
+            var(--neon-cyan),
+            var(--neon-purple),
+            var(--neon-green));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow:
+        0 0 14px rgba(56, 189, 248, 0.7),
+        0 0 24px rgba(88, 28, 135, 0.5);
+    animation: infoTextGlow 6s ease-in-out infinite;
+}
+
+/* lekki gradient przy lewej krawędzi jak „szyna energii” */
+.info-dnia::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg,
+            var(--neon-green),
+            var(--neon-cyan),
+            var(--neon-purple));
+    box-shadow: 0 0 18px rgba(34, 197, 94, 0.8);
+    opacity: 0.9;
+}
+
+/* delikatne „tętniące” światło */
+@keyframes infoGlow {
+    0% {
+        background-position: 0% 50%;
+        opacity: 0.65;
+    }
+
+    50% {
+        background-position: 100% 50%;
+        opacity: 1;
+    }
+
+    100% {
+        background-position: 0% 50%;
+        opacity: 0.75;
+    }
+}
+
+@media (max-width: 640px) {
+    .info-dnia {
+        padding: 1.1rem 1.2rem;
+        border-radius: 16px;
+    }
+
+    #info-dnia-opis {
+        font-size: 0.98rem;
+    }
+
+    #info-dnia-kod {
+        font-size: 0.85rem;
+    }
+}
