@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Kwestionariusz stylów uczenia się</title>
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-alt: #020617;
+      --card-bg: rgba(15, 23, 42, 0.96);
+      --accent: #22d3ee;
+      --accent-soft: rgba(34, 211, 238, 0.15);
+      --accent-2: #facc15;
+      --accent-pink: #e879f9;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --shadow-strong: 0 22px 80px rgba(15, 23, 42, 0.9);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.16), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(244, 63, 94, 0.18), transparent 55%),
+        radial-gradient(circle at 50% 100%, rgba(250, 204, 21, 0.12), transparent 55%),
+        var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    .wrapper {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
+      position: relative;
+    }
+
+    .wrapper::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg,
+          rgba(148, 163, 184, 0.08) 0,
+          transparent 10%,
+          transparent 90%,
+          rgba(148, 163, 184, 0.08) 100%);
+      mix-blend-mode: soft-light;
+      opacity: 0.6;
+      z-index: -1;
+    }
+
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.9rem;
+      margin-bottom: 1.2rem;
+
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      background: rgba(15, 23, 42, 0.95);
+
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.85);
+      transition: transform 0.12s ease-out,
+        box-shadow 0.12s ease-out,
+        border-color 0.12s ease-out,
+        background 0.12s ease-out;
+    }
+
+    .back-home:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      background: radial-gradient(circle at 0 0,
+          rgba(34, 211, 238, 0.22),
+          rgba(15, 23, 42, 0.98));
+      box-shadow: 0 18px 50px rgba(34, 211, 238, 0.55);
+    }
+
+    .back-home-icon {
+      font-size: 1.1rem;
+      line-height: 1;
+      color: var(--accent);
+    }
+
+    h1 {
+      text-align: center;
+      margin: 0 0 0.35rem;
+      font-size: clamp(2rem, 3vw, 2.4rem);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      position: relative;
+    }
+
+    h1::before {
+      content: "</>";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-155%);
+      top: -0.2rem;
+      font-size: 0.75rem;
+      color: var(--accent-2);
+      text-shadow: 0 0 12px rgba(250, 204, 21, 0.6);
+    }
+
+    .title-glitch {
+      position: relative;
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      box-shadow:
+        0 0 24px rgba(34, 211, 238, 0.35),
+        0 0 40px rgba(236, 72, 153, 0.35);
+      background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.18), transparent 70%);
+      backdrop-filter: blur(10px);
+    }
+
+    .intro {
+      text-align: center;
+      margin-bottom: 1.75rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .tagline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.85);
+      box-shadow: 0 0 22px rgba(34, 211, 238, 0.25);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      margin-bottom: 0.75rem;
+      display: inline-flex;
+    }
+
+    .tagline-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent-2);
+      box-shadow: 0 0 10px rgba(250, 204, 21, 0.8);
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr);
+      gap: 1.1rem;
+    }
+
+    @media (min-width: 960px) {
+      .grid-layout {
+        grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.1fr);
+        align-items: flex-start;
+      }
+    }
+
+    .question-list {
+      position: relative;
+      z-index: 1;
+    }
+
+    .stats-panel {
+      position: sticky;
+      top: 1.5rem;
+      align-self: flex-start;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.98));
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      box-shadow: var(--shadow-strong);
+      padding: 1.25rem 1.3rem 1.4rem;
+      overflow: hidden;
+    }
+
+    .stats-panel::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      background:
+        conic-gradient(from 210deg,
+          transparent 0,
+          rgba(34, 211, 238, 0.7) 25%,
+          rgba(236, 72, 153, 0.7) 45%,
+          rgba(250, 204, 21, 0.8) 60%,
+          transparent 80%);
+      opacity: 0.12;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .stats-panel h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .stats-chip {
+      font-size: 0.7rem;
+      border-radius: 999px;
+      padding: 0.1rem 0.6rem;
+      border: 1px dashed rgba(148, 163, 184, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    .stats-body {
+      font-size: 0.86rem;
+      color: var(--muted);
+      margin-bottom: 0.8rem;
+    }
+
+    .mini-badges {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .mini-badge {
+      border-radius: 999px;
+      padding: 0.2rem 0.6rem;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      background: rgba(15, 23, 42, 0.96);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      white-space: nowrap;
+    }
+
+    .mini-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+    }
+
+    .mini-dot.a {
+      background: var(--accent);
+      box-shadow: 0 0 12px rgba(34, 211, 238, 0.9);
+    }
+
+    .mini-dot.b {
+      background: #22c55e;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.9);
+    }
+
+    .mini-dot.c {
+      background: var(--accent-pink);
+      box-shadow: 0 0 12px rgba(232, 121, 249, 0.9);
+    }
+
+    .mini-dot.d {
+      background: var(--accent-2);
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.9);
+    }
+
+    .question {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 1.1rem 1.25rem;
+      margin-bottom: 0.85rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow:
+        0 14px 40px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .question::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      background:
+        linear-gradient(135deg,
+          rgba(34, 211, 238, 0.18),
+          rgba(236, 72, 153, 0.12),
+          rgba(250, 204, 21, 0.1));
+      mix-blend-mode: soft-light;
+      opacity: 0;
+      transition: opacity 0.18s ease-out;
+      pointer-events: none;
+    }
+
+    .question:hover::before {
+      opacity: 1;
+    }
+
+    .question-header {
+      display: flex;
+      align-items: baseline;
+      gap: 0.55rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .question-number {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+    }
+
+    .question-title {
+      font-weight: 600;
+      font-size: 0.98rem;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.35rem;
+    }
+
+    @media (min-width: 760px) {
+      .options {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+    }
+
+    label {
+      font-size: 0.9rem;
+      cursor: pointer;
+      line-height: 1.4;
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+      padding: 0.35rem 0.45rem;
+      border-radius: 10px;
+      transition: background 0.16s ease-out, transform 0.08s ease-out, box-shadow 0.16s ease-out;
+      border: 1px solid transparent;
+    }
+
+    label:hover {
+      background: rgba(15, 23, 42, 0.9);
+      transform: translateY(-0.5px);
+      box-shadow: 0 0 18px rgba(34, 211, 238, 0.35);
+      border-color: rgba(148, 163, 184, 0.5);
+    }
+
+    input[type="checkbox"] {
+      margin-top: 0.1rem;
+      accent-color: var(--accent);
+      min-width: 16px;
+      min-height: 16px;
+    }
+
+    .answer-tag {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: rgba(148, 163, 184, 0.95);
+      min-width: 1.5rem;
+    }
+
+    .answer-text {
+      flex: 1;
+    }
+
+    .actions {
+      text-align: center;
+      margin-top: 2.1rem;
+    }
+
+    button {
+      background: radial-gradient(circle at 0 0, rgba(34, 211, 238, 0.25), transparent 55%),
+        linear-gradient(120deg, #22c55e, #22d3ee, #e879f9);
+      color: #020617;
+      border: none;
+      border-radius: 999px;
+      padding: 0.9rem 2.7rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 16px 50px rgba(34, 211, 238, 0.45);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 22px 70px rgba(34, 211, 238, 0.8);
+      filter: brightness(1.06);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 30px rgba(34, 211, 238, 0.4);
+    }
+
+    .hint {
+      margin-top: 0.7rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      opacity: 0.9;
+    }
+
+    .result {
+      margin-top: 1.3rem;
+      padding: 1.1rem 1.2rem 1.25rem;
+      border-radius: var(--radius-lg);
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      box-shadow: 0 16px 50px rgba(15, 23, 42, 0.9);
+      display: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      background:
+        linear-gradient(90deg,
+          rgba(34, 211, 238, 0.18),
+          rgba(56, 189, 248, 0.1),
+          transparent 30%,
+          transparent 70%,
+          rgba(250, 204, 21, 0.16));
+      opacity: 0.9;
+      mix-blend-mode: soft-light;
+      pointer-events: none;
+    }
+
+    .result-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .result h2 {
+      margin: 0 0 0.6rem;
+      font-size: 1.02rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .result-pulse {
+      width: 9px;
+      height: 18px;
+      border-radius: 999px;
+      background: linear-gradient(to bottom, var(--accent), var(--accent-2));
+      box-shadow:
+        0 0 16px rgba(34, 211, 238, 0.9),
+        0 0 24px rgba(250, 204, 21, 0.7);
+    }
+
+    .result-main {
+      font-size: 0.95rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .result-main strong {
+      color: var(--accent-2);
+      text-shadow: 0 0 12px rgba(250, 204, 21, 0.8);
+    }
+
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.3rem;
+      font-size: 0.85rem;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .result-table th,
+    .result-table td {
+      border: 1px solid rgba(51, 65, 85, 0.9);
+      padding: 0.35rem 0.45rem;
+      text-align: center;
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .result-table th {
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    .result-row-label {
+      text-align: left;
+      font-weight: 500;
+      font-size: 0.86rem;
+    }
+
+    .result-row-label span {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-right: 0.35rem;
+    }
+
+    .note {
+      margin-top: 0.55rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .note strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <div style="text-align:center; margin-bottom: 1.2rem;">
+      <div class="tagline">
+        <span class="tagline-dot"></span>
+        <span>Panel diagnostyczny / styl uczenia się</span>
+      </div>
+      <h1><span class="title-glitch">Twój styl uczenia się</span></h1>
+      <p class="intro">
+        Przy każdym pytaniu możesz zaznaczyć <strong>więcej niż jedną</strong> odpowiedź.
+        Po kliknięciu przycisku poniżej system policzy wszystkie wybory A / B / C / D
+        i pokaże, który styl uczenia się dominuje.
+      </p>
+    </div>
+
+    <div class="grid-layout">
+      <div class="question-list">
+        <form id="style-form">
+          <!-- Pytanie 1 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q01</div>
+              <div class="question-title">
+                Gdy spotykasz nieznaną ci osobę, na co zwracasz uwagę w pierwszej kolejności?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q1" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">jak wygląda i jak jest ubrana</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q1" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">w jaki sposób i co mówi, jaki ma głos</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q1" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">co w stosunku do niej czujesz</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q1" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">w jaki sposób się zachowuje i co robi</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 2 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q02</div>
+              <div class="question-title">
+                Co najczęściej zostaje ci w pamięci po kilku dniach od spotkania nieznanej ci wcześniej osoby?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q2" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">jej twarz</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q2" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">jej imię, nazwisko</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q2" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">to, co czułeś, będąc w jej towarzystwie, nawet jeśli zapomniałeś jej imienia,
+                  nazwiska lub twarzy</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q2" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">to, co robiliście razem, nawet jeśli zapomniałeś jej imienia, nazwiska lub
+                  twarzy</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 3 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q03</div>
+              <div class="question-title">
+                Gdy wchodzisz do nieznanego ci pomieszczenia, na co zwracasz przede wszystkim uwagę?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q3" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">na jego wygląd</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q3" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">na dźwięki i rozmowy, jakie się w nim toczą</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q3" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">na to, jak dobrze emocjonalnie i fizycznie się w nim czujesz</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q3" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">na to, co się w nim dzieje i co ty mógłbyś w nim robić</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 4 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q04</div>
+              <div class="question-title">
+                Gdy uczysz się czegoś nowego, w jaki sposób robisz to najchętniej?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q4" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">gdy nauczyciel daje ci coś do czytania lub oglądania (np. prezentację,
+                  pokaz)</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q4" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">gdy nauczyciel tłumaczy to ustnie lub dyskutuje z tobą</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q4" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">gdy możesz sporządzać notatki, rysować, tworzyć wykresy lub schematy</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q4" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">gdy możesz eksperymentować, wykonywać ćwiczenia praktyczne, coś dotykać lub
+                  działać w ruchu</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 5 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q05</div>
+              <div class="question-title">
+                Gdy uczysz czegoś innych, co zwykle robisz?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q5" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">dajesz im coś do oglądania (przedmiot, wykres, schemat, ilustrację,
+                  zdjęcie)</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q5" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">tłumaczysz, odpowiadasz na pytania</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q5" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">zapisujesz najważniejsze informacje, listy, tabelki, wykresy, schematy</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q5" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">demonstrujesz coś, robiąc to lub każesz innym robić to razem z tobą</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 6 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q06</div>
+              <div class="question-title">
+                Jaki rodzaj książek czytasz najchętniej?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q6" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">z opisami, które pozwalają ci zobaczyć w wyobraźni słowa autora</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q6" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">książki zawierające fakty, historyczne lub dużo dialogów</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q6" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">skupione na tym, co bohaterowie czują i przeżywają</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q6" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">z dużą ilością działania, ruchu, sportu, przygód</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 7 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q07</div>
+              <div class="question-title">
+                Którą z poniższych czynności wykonujesz najchętniej w czasie wolnym?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q7" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">czytasz książkę lub przeglądasz czasopismo</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q7" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">słuchasz muzyki, radia, podcastów lub rozmawiasz z przyjaciółmi</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q7" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">rysujesz, malujesz, robisz coś rękami, majsterkujesz</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q7" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">uprawiasz sport, budujesz coś lub grasz w grę wymagającą ruchu</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 8 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q08</div>
+              <div class="question-title">
+                Które z poniższych stwierdzeń najlepiej charakteryzuje sposób, w jaki czytasz lub uczysz się?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q8" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">potrafisz się uczyć, gdy słychać muzykę, inne dźwięki lub rozmowę, bo umiesz
+                  się od nich odłączyć</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q8" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">nie potrafisz się uczyć, gdy w pobliżu słychać muzykę, dźwięki lub
+                  rozmowę</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q8" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">musisz czuć się wygodnie i rozluźniony, potrafisz pracować zarówno przy
+                  muzyce, jak i w ciszy</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q8" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">musisz czuć się wygodnie i rozluźniony, często zmieniasz pozycję, kręcisz się,
+                  chodzisz po pokoju</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 9 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q09</div>
+              <div class="question-title">
+                Gdy z kimś rozmawiasz, gdzie kierujesz wzrok?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q9" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">patrzysz na twarz rozmówcy, chcesz także, by ta osoba patrzyła na
+                  ciebie</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q9" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">niekoniecznie patrzysz na twarz rozmówcy, ważniejsze jest to, co mówi</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q9" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">patrzysz na rozmówcę, ale równie ważne są emocje, które w tobie
+                  wywołuje</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q9" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">rozglądasz się wokół, reagujesz na każdy ruch lub działanie w otoczeniu</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 10 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q10</div>
+              <div class="question-title">
+                Które z poniższych stwierdzeń najlepiej do ciebie pasuje?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q10" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">zwracasz uwagę na kolory, kształty, wzory i detale</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q10" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">zwracasz uwagę na dźwięki, ton głosu, melodię wypowiedzi</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q10" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">zwracasz uwagę na emocje w sobie i innych</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q10" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">często się wiercisz, poruszasz, gestykulujesz, stukasz w podłogę lub poruszasz
+                  nogami</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 11 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q11</div>
+              <div class="question-title">
+                Które z poniższych stwierdzeń najlepiej do ciebie pasuje?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q11" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">zwracasz uwagę na niedopasowane ubrania, niepasujące kolory i wzory</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q11" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">zwracasz uwagę na hałas, zgrzyty, niewłaściwy ton głosu</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q11" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">zwracasz uwagę na napiętą atmosferę, konflikty, nastroje innych osób</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q11" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">zwracasz uwagę na niewygodę, brak ruchu, źle znosisz siedzenie
+                  nieruchomo</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 12 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q12</div>
+              <div class="question-title">
+                Co wywołuje u ciebie największy niepokój?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q12" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">miejsce, w którym panuje bałagan i nieład</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q12" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">miejsce, w którym jest za cicho</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q12" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">miejsce, w którym ludzie są zdenerwowani, smutni lub wrogo nastawieni</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q12" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">miejsce, w którym nie wolno nic robić lub jest za mało przestrzeni na
+                  ruch</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 13 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q13</div>
+              <div class="question-title">
+                Czego najbardziej nie lubisz, podczas gdy ktoś ciebie uczy?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q13" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">słuchania wykładu bez żadnych pomocy wizualnych</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q13" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">słuchania wykładu z monotonnym lub zbyt cichym głosem</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q13" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">niemożności rysowania, dotykania wszystkiego rękami lub sporządzania
+                  notatek</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q13" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">patrzenia i słuchania w bezruchu</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 14 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q14</div>
+              <div class="question-title">
+                Wróć pamięcią do jakiegoś szczęśliwego momentu ze swojego życia. Jakie wspomnienia utkwiły ci w pamięci?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q14" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">to, co widziałeś (wygląd ludzi, miejsc, kolory, światło)</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q14" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">to, co słyszałeś (głosy ludzi, muzyka, dźwięki otoczenia)</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q14" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">wrażenia dotykowe na skórze i ciele, a także to, jak czułeś się fizycznie i
+                  emocjonalnie</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q14" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">to, co robiłeś – ruchy ciała, dokonania, aktywność</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 15 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q15</div>
+              <div class="question-title">
+                Przypomnij sobie któreś ze swoich wakacji lub wycieczek. Jakie wspomnienia utkwiły ci w pamięci?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q15" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">to, co widziałeś (wygląd ludzi, miejsc, kolory, światło)</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q15" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">to, co słyszałeś (głosy ludzi, muzyka, dźwięki otoczenia)</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q15" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">wrażenia dotykowe na skórze i ciele, jak czułeś się fizycznie i
+                  emocjonalnie</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q15" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">to, co robiłeś – ruch, aktywność, dokonania</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 16 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q16</div>
+              <div class="question-title">
+                Wyobraź sobie, że musisz przez cały czas przebywać w jednym z następujących miejsc. W którym czułbyś się
+                najlepiej?
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q16" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">miejsce, w którym możesz czytać; oglądać obrazy, dzieła sztuki, mapy, wykresy
+                  i fotografie; rozwiązywać zagadki wizualne</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q16" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">miejsce, w którym możesz słuchać nagranych na kasety opowiadań, muzyki,
+                  radiowych lub telewizyjnych talk shows i wiadomości; grać na instrumencie lub śpiewać</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q16" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">miejsce, w którym możesz rysować, malować, rzeźbić lub zajmować się
+                  rzemiosłem; tworzyć coś na piśmie lub pisać na komputerze; wykonywać czynności przy użyciu rąk</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q16" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">miejsce, w którym możesz uprawiać sport, grać w piłkę lub gry ruchowe, które
+                  angażują twoje ciało; odgrywać rolę w sztuce teatralnej lub przedstawieniu</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pytanie 17 -->
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number">Q17</div>
+              <div class="question-title">
+                Gdybyś miał zapamiętać nowe słowo, zrobiłbyś to najlepiej:
+              </div>
+            </div>
+            <div class="options">
+              <label>
+                <input type="checkbox" name="q17" value="A">
+                <span class="answer-tag">A</span>
+                <span class="answer-text">widząc je zapisane</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q17" value="B">
+                <span class="answer-tag">B</span>
+                <span class="answer-text">słysząc je</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q17" value="C">
+                <span class="answer-tag">C</span>
+                <span class="answer-text">zapisując je samodzielnie</span>
+              </label>
+              <label>
+                <input type="checkbox" name="q17" value="D">
+                <span class="answer-tag">D</span>
+                <span class="answer-text">odtwarzając je ruchem, gestem lub w wyobraźni</span>
+              </label>
+            </div>
+          </div>
+        </form>
+
+        <div class="actions">
+          <button type="button" onclick="calculateStyle()">Zatwierdź odpowiedzi</button>
+          <div class="hint">
+            Możesz zaznaczać wiele odpowiedzi w ramach jednego pytania – liczy się <strong>łączna liczba</strong>
+            wyborów A / B / C / D.
+          </div>
+        </div>
+      </div>
+      <aside class="stats-panel">
+        <a href="index.html" class="back-home">
+          <span class="back-home-icon">←</span>
+          <span>Powrót na stronę główną</span>
+        </a>
+        <h2>
+          Podgląd wyników
+          <span class="stats-chip">live / summary</span>
+        </h2>
+        <p class="stats-body">
+          Po kliknięciu przycisku <strong>"Zatwierdź odpowiedzi"</strong> po lewej stronie,
+          pojawi się tutaj informacja o dominującym stylu uczenia się oraz
+          tabela z liczbą wszystkich wskazanych odpowiedzi A, B, C i D.
+        </p>
+        <div class="mini-badges">
+          <div class="mini-badge">
+            <span class="mini-dot a"></span>
+            <span>A – wzrokowiec</span>
+          </div>
+          <div class="mini-badge">
+            <span class="mini-dot b"></span>
+            <span>B – słuchowiec</span>
+          </div>
+          <div class="mini-badge">
+            <span class="mini-dot c"></span>
+            <span>C – dotykowiec</span>
+          </div>
+          <div class="mini-badge">
+            <span class="mini-dot d"></span>
+            <span>D – kinestetyk</span>
+          </div>
+        </div>
+
+        <div id="result" class="result">
+          <div class="result-inner">
+            <h2>
+              <span class="result-pulse"></span>
+              <span id="result-title">Wynik</span>
+            </h2>
+            <p class="result-main" id="result-main">
+              Tutaj pojawi się opis Twojego stylu uczenia się po zatwierdzeniu odpowiedzi.
+            </p>
+            <table class="result-table">
+              <thead>
+                <tr>
+                  <th>Styl</th>
+                  <th>Liczba odpowiedzi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="result-row-label"><span>A</span> wzrokowiec</td>
+                  <td id="count-A">0</td>
+                </tr>
+                <tr>
+                  <td class="result-row-label"><span>B</span> słuchowiec</td>
+                  <td id="count-B">0</td>
+                </tr>
+                <tr>
+                  <td class="result-row-label"><span>C</span> dotykowiec</td>
+                  <td id="count-C">0</td>
+                </tr>
+                <tr>
+                  <td class="result-row-label"><span>D</span> kinestetyk</td>
+                  <td id="count-D">0</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="note">
+              <strong>Uwaga:</strong> test ma charakter orientacyjny – pomaga zrozumieć,
+              jakie formy pracy (obraz, słuchanie, notowanie, ruch) mogą być dla Ciebie
+              najbardziej naturalne i wygodne podczas nauki.
+            </p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    function calculateStyle() {
+      const counts = { A: 0, B: 0, C: 0, D: 0 };
+      const totalQuestions = 17;
+      let totalSelected = 0;
+      let answeredQuestions = 0;
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selected = document.querySelectorAll('input[name="q' + i + '"]:checked');
+
+        if (selected.length > 0) { // NOWE – na ile PYTAŃ odpowiedział
+          answeredQuestions++;
+        }
+
+        selected.forEach(input => {
+          const val = input.value;
+          if (counts[val] !== undefined) {
+            counts[val]++;
+            totalSelected++;
+          }
+        });
+      }
+
+      if (totalSelected === 0) {
+        alert("Zaznacz przynajmniej jedną odpowiedź, aby obliczyć wynik.");
+        return;
+      }
+
+      const styles = {
+        A: "A – wzrokowiec (najlepiej uczysz się poprzez obraz, czytanie, obserwację)",
+        B: "B – słuchowiec (najlepiej uczysz się poprzez słuchanie i rozmowę)",
+        C: "C – dotykowiec (najlepiej uczysz się, gdy możesz dotykać, manipulować przedmiotami, zapisywać)",
+        D: "D – kinestetyk (najlepiej uczysz się w ruchu, poprzez działanie i doświadczanie)"
+      };
+
+      let max = 0;
+      for (const key in counts) {
+        if (counts[key] > max) max = counts[key];
+      }
+      const resultTitle = document.getElementById("result-title");
+      if (resultTitle) {
+        resultTitle.textContent = "Wynik " + answeredQuestions + "/" + totalQuestions;
+
+        if (answeredQuestions === totalQuestions) {
+          resultTitle.style.color = "#22c55e";
+        } else {
+          resultTitle.style.color = "#ef4444";
+        }
+      }
+
+      const dominantLetters = Object.keys(counts).filter(k => counts[k] === max && max > 0);
+      let mainText = "";
+
+      if (dominantLetters.length === 1) {
+        const letter = dominantLetters[0];
+        mainText = "Twój dominujący styl uczenia się: <strong>" + styles[letter] + "</strong>";
+      } else {
+        const pretty = dominantLetters.map(l => styles[l]).join("<br>");
+        mainText = "Masz kilka równie silnych stylów uczenia się:<br>" + pretty;
+      }
+
+      document.getElementById("count-A").textContent = counts.A;
+      document.getElementById("count-B").textContent = counts.B;
+      document.getElementById("count-C").textContent = counts.C;
+      document.getElementById("count-D").textContent = counts.D;
+
+      const resultMain = document.getElementById("result-main");
+      resultMain.innerHTML = mainText;
+
+      const resultDiv = document.getElementById("result");
+      resultDiv.style.display = "block";
+      resultDiv.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  </script>
+</body>
+
+</html>
