@@ -449,13 +449,9 @@
 
             <!-- NAGŁÓWEK PODSTRONY -->
             <header class="page-header">
-
                 <!-- Tytuł konkretnego tematu -->
                 <h1 class="page-title">Python: projektowanie gier 2p</h1>
-
-
             </header>
-
             <div class="layout-grid">
                 <!-- KOLUMNA GŁÓWNA: opis + kod + zadania -->
                 <div>
@@ -488,8 +484,7 @@
 # Silnik: ekran(), menu(), scena(), walka()
 # Fabuła: dopisuj kolejne funkcje-scen i dodawaj je do SCENY.
 
-from state import STATE
-from engine import ekran, walka, scena
+import os, random
 
 # ------------------ SCENY (PROSTE FUNKCJE) ------------------
 # Dodajesz kolejne sceny wg wzoru: funkcje i wpis w SCENY.
@@ -609,6 +604,184 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# ------------------ STAN GRY ------------------
+
+STATE = {
+    "imie": "Bezimienny",
+    "hp": 20,
+    "ekwipunek": [],
+    "defeated": set(),  # <— tu trzymamy ID pokonanych
+}
+
+
+CLEAR = "cls" if os.name == "nt" else "clear"
+RAMKA = "#" * 20
+P_UNIK_CIOS      = 0.40
+P_BLOK_CIOS      = 0.60
+P_UNIK_SZARZA    = 0.20
+P_BLOK_SZARZA    = 0.40
+P_SZARZA_KONTRA  = 0.10
+DMG_BONUS_SZARZA = 2
+SELF_PENALTY     = 1
+
+
+def _inv_str():
+    return ", ".join(STATE["ekwipunek"]) if STATE["ekwipunek"] else "(pusty)"
+
+def ekran(tytul, tresc=""):
+    os.system(CLEAR)
+    # — stały nagłówek ze statystykami —
+    pokonani = len(STATE.get("defeated", []))  # set lub lista; działa w obu przypadkach
+    print(f"{RAMKA}")
+    print(f"{STATE['imie']} | HP: {STATE['hp']}\nEkwipunek: {_inv_str()}\nPokonani: {pokonani}")
+    print(f"{RAMKA}")
+
+    # — tytuł sceny —
+    print(f"{tytul}")
+    print(f"{RAMKA}")
+
+    # — treść sceny (opcjonalnie) —
+    if tresc:
+        print(tresc)
+
+def menu(opcje, prompt=": "):
+    for i, o in enumerate(opcje, 1):
+        print(f"  {i}. {o}")
+    while True:
+        try:
+            v = int(input(prompt))
+            if 1 <= v <= len(opcje):
+                return v - 1
+        except ValueError:
+            pass
+        print("Wybierz numer z listy.")
+
+def input_akcja(allowed, prompt):
+    allowed = tuple(allowed)
+    while True:
+        a = input(prompt).strip().lower()
+        if a in allowed:
+            return a
+        print(f"Dozwolone: {', '.join(allowed)}")
+
+def walka(nazwa_wroga, hp_gracza, hp_wroga):
+    """Minimalny kręgosłup walki: akcje 'cios'/'unik', naprzemienne tury."""
+    akcje = ("cios", "szarza", "unik", "blok")
+    akcje_off = ("cios", "szarza")
+    akcje_def = ("unik", "blok", "cios")
+    runda = 1
+    gracz_zaczyna = True
+    def dmg(): return random.randint(2, 4)
+
+    while hp_gracza > 0 and hp_wroga > 0:
+        ekran(f"WALKA — {nazwa_wroga} — Runda {runda}",
+              f"HP Gracz: {hp_gracza} | HP {nazwa_wroga}: {hp_wroga}\n")
+        if gracz_zaczyna:
+            a_g = input_akcja(("cios","szarza","ucieczka"), "Twój ruch (cios/szarza/ucieczka): ")
+            if a_g == "ucieczka":
+                return hp_gracza, hp_wroga
+            a_w = random.choice(akcje_def)
+            hp_gracza, hp_wroga = rozstrzygnij_ture("gracz", a_g, a_w, hp_gracza, hp_wroga, dmg)
+        else:
+            a_w = random.choice(akcje_off)
+            print(f"{nazwa_wroga} zaczyna i deklaruje: {a_w}")
+            a_g = input_akcja(("blok","unik","cios"), "Twoja odpowiedź (blok/unik/cios): ")
+            hp_gracza, hp_wroga = rozstrzygnij_ture("wróg", a_w, a_g, hp_gracza, hp_wroga, dmg)
+
+        input("ENTER...")
+        gracz_zaczyna = not gracz_zaczyna
+        runda += 1
+
+    return hp_gracza, hp_wroga
+
+def rozstrzygnij_ture(kto_atakuje, akcja_atk, akcja_def, hp_g, hp_w, dmg_fn):
+    """Prosta logika: cios vs unik (40% unik), cios vs cios = wymiana."""
+    if akcja_atk == "cios" and akcja_def == "unik":
+        if random.random() < P_UNIK_CIOS:
+            print("Unik skuteczny.")
+        else:
+            obrazenia = dmg_fn()
+            if kto_atakuje == "gracz": 
+                hp_w -= obrazenia
+            else:                       
+                hp_g -= obrazenia
+            print(f"Trafienie za {obrazenia}.")
+    elif akcja_atk == "cios" and akcja_def == "cios":
+        a, b = dmg_fn(), dmg_fn()
+        if kto_atakuje == "gracz":
+            hp_w -= a 
+            hp_g -= b
+        else:
+            hp_g -= a
+            hp_w -= b
+        print(f"Wymiana ciosów: {a} / {b}.")
+    elif akcja_atk == "cios" and akcja_def == "blok":
+        if random.random() < P_BLOK_CIOS:
+            print("Blok skuteczny.")
+        else:
+            obrazenia = dmg_fn()
+            if kto_atakuje == "gracz": 
+                hp_w -= obrazenia
+            else:                       
+                hp_g -= obrazenia
+            print(f"Trafienie za {obrazenia}.")
+    elif akcja_atk == "szarza" and akcja_def == "unik":
+        if random.random() < P_UNIK_SZARZA:
+            print("Unik skuteczny.")
+            hp_g -= SELF_PENALTY
+        else:
+            obrazenia = dmg_fn() + 2
+            if kto_atakuje == "gracz": 
+                hp_w -= obrazenia
+            else:                       
+                hp_g -= obrazenia
+            print(f"Trafienie za {obrazenia}.")
+    elif akcja_atk == "szarza" and akcja_def == "blok":
+        if random.random() < P_BLOK_SZARZA:
+            print("Blok skuteczny.")
+            hp_g -= SELF_PENALTY
+        else:
+            obrazenia = dmg_fn() + 2
+            if kto_atakuje == "gracz": 
+                hp_w -= obrazenia
+            else:                       
+                hp_g -= obrazenia
+            print(f"Trafienie za {obrazenia}.")
+    elif akcja_atk == "szarza" and akcja_def == "cios":
+        if random.random() < P_SZARZA_KONTRA:
+            print("Ryzykownie ale skutecznie.")
+            hp_g -= SELF_PENALTY
+            hp_w -= 4
+        else:
+            obrazenia = dmg_fn() * 2
+            if kto_atakuje == "gracz": 
+                hp_w -= obrazenia
+            else:                       
+                hp_g -= obrazenia
+            print(f"Trafienie za {obrazenia}.")
+    else:
+        print("Bez obrażeń.")
+    print(f"→ HP Gracz: {max(0, hp_g)} | HP Wróg: {max(0, hp_w)}")
+    return hp_g, hp_w
+
+def scena(nazwa, opis, akcje):
+    """
+    Uniwersalna scena.
+    nazwa: tytuł sceny
+    opis: krótki tekst
+    akcje: lista krotek (etykieta, funkcja_bez_arg) zwracających 'next' (klucz sceny) lub None
+    """
+    while True:
+        ekran(nazwa, opis)
+        idx = menu([a[0] for a in akcje] + ["Zakończ"])
+        if idx == len(akcje):
+            return None
+        next_key = akcje[idx][1]()  # wywołaj akcję
+        if next_key is not None:
+            return next_key  # przejdź do kolejnej sceny
+        # jeśli akcja nic nie zwróciła, odśwież tę samą scenę
 </span></code></pre>
                         </div>
                     </article>
