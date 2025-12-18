@@ -592,20 +592,6 @@ SCENY = {
     "korytarz": sc_korytarz,
 }
 
-# ------------------ PĘTLA GŁÓWNA ------------------
-
-def main():
-    STATE["imie"] = input("Podaj imię: ").strip() or "Bezimienny"
-    aktualna = "wejscie"
-    while aktualna and STATE["hp"] > 0:
-        aktualna = SCENY[aktualna]()  
-        # wywołaj funkcję-scenę; dostaniesz klucz następnej
-    ekran("KONIEC", "Dzięki za grę.")
-
-if __name__ == "__main__":
-    main()
-
-
 # ------------------ STAN GRY ------------------
 
 STATE = {
@@ -782,6 +768,19 @@ def scena(nazwa, opis, akcje):
         if next_key is not None:
             return next_key  # przejdź do kolejnej sceny
         # jeśli akcja nic nie zwróciła, odśwież tę samą scenę
+
+# ------------------ PĘTLA GŁÓWNA ------------------
+
+def main():
+    STATE["imie"] = input("Podaj imię: ").strip() or "Bezimienny"
+    aktualna = "wejscie"
+    while aktualna and STATE["hp"] > 0:
+        aktualna = SCENY[aktualna]()  
+        # wywołaj funkcję-scenę; dostaniesz klucz następnej
+    ekran("KONIEC", "Dzięki za grę.")
+
+if __name__ == "__main__":
+    main()
 </span></code></pre>
                         </div>
                     </article>
