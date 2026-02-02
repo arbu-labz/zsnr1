@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Stranger Things S01E01 — Learning Story (Python)</title>
+    <style>
+        :root {
+            --bg: #0b0f17;
+            --card: #0f1724;
+            --ink: #e9eefc;
+            --muted: #a9b4d0;
+            --line: rgba(255, 255, 255, .10);
+            --chip: #1c2a44;
+            --accent: #7aa2ff;
+            --code: #0b1220;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            background: radial-gradient(1200px 800px at 20% 0%, rgba(122, 162, 255, .15), transparent 60%),
+                radial-gradient(900px 700px at 90% 10%, rgba(255, 90, 150, .12), transparent 55%),
+                var(--bg);
+            color: var(--ink);
+            line-height: 1.55;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(10px);
+            background: rgba(11, 15, 23, .65);
+            border-bottom: 1px solid var(--line);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .chip {
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+            padding: 8px 12px;
+            border: 1px solid var(--line);
+            background: rgba(28, 42, 68, .55);
+            color: var(--muted);
+            border-radius: 999px;
+            font-size: 13px;
+            letter-spacing: .2px;
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 18px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 18px;
+            align-items: start;
+        }
+
+        @media (max-width: 980px) {
+            .grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .card {
+            background: rgba(15, 23, 36, .72);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
+        }
+
+        header {
+            padding: 18px 18px 6px 18px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        h1 {
+            margin: 6px 0 12px 0;
+            font-size: 26px;
+            line-height: 1.15;
+            letter-spacing: .2px;
+        }
+
+        .sub {
+            margin: 0 0 14px 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .prose {
+            padding: 18px;
+        }
+
+        .prose p {
+            margin: 0 0 14px 0;
+            color: rgba(233, 238, 252, .92)
+        }
+
+        .hr {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--line), transparent);
+            margin: 18px 0;
+        }
+
+        pre {
+            background: rgba(11, 18, 32, .85);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+            overflow: auto;
+            margin: 12px 0 18px 0;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 13px;
+            color: rgba(233, 238, 252, .95);
+        }
+
+        .aside {
+            position: sticky;
+            top: 76px;
+            padding: 18px;
+            background: rgba(15, 23, 36, .55);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+        }
+
+        .lead {
+            margin: 0 0 10px 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .aside h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            letter-spacing: .2px;
+        }
+
+        .aside ul,
+        .aside ol {
+            margin: 10px 0 0 20px;
+            color: rgba(233, 238, 252, .90)
+        }
+
+        .aside li {
+            margin: 6px 0
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--muted);
+            font-size: 12px;
+            margin-left: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="topbar">
+        <div class="chip">
+            <span>Episode</span>
+            <strong>Stranger Things — S01E01</strong>
+            <span class="tag">Python basics</span>
+        </div>
+    </div>
+
+    <div class="wrap">
+        <div class="grid">
+            <main class="card">
+                <header>
+                    <h1>The Vanishing Signal</h1>
+                    <p class="sub">A learning story that secretly teaches a tiny Python program: read two numbers → add
+                        → print.</p>
+                </header>
+
+                <section class="prose">
+                    <p>
+                        The night in <strong>Hawkins</strong> feels normal—until it doesn’t.
+                        One moment, the road is quiet. The next, <strong>Will</strong> is gone.
+                        His bicycle lies like a dropped sentence, unfinished.
+                    </p>
+
+                    <p>
+                        The next day, <strong>Mike</strong>, <strong>Dustin</strong>, and <strong>Lucas</strong> sit in
+                        Mike’s basement,
+                        surrounded by board games and nervous silence. Mike opens his laptop like it’s a flashlight.
+                    </p>
+
+                    <p>
+                        “We can’t fight a monster,” Dustin says, “but we can build a tool. A tiny one.”
+                    </p>
+
+                    <p>
+                        Lucas raises an eyebrow. “A tool for what?”
+                    </p>
+
+                    <p>
+                        Mike taps the keyboard. “For thinking clearly. Step one: ask the user for information.”
+                    </p>
+
+                    <hr class="hr" />
+
+                    <p>
+                        Mike writes a single line and turns the screen toward the others.
+                        “In Python,” he says, “the simplest way to get text from the user is <code>input()</code>.”
+                        It’s like listening for a message in the dark.
+                    </p>
+
+                    <pre><code># 1) Read something from the keyboard
+first = input("Enter the first number: ")</code></pre>
+
+                    <p>
+                        Dustin leans in. “So… we got a number?”
+                    </p>
+
+                    <p>
+                        Mike shakes his head. “Not yet. Here’s the trick: <code>input()</code> gives us a
+                        <em>string</em>,
+                        like a label, not a real number.”
+                    </p>
+
+                    <p>
+                        Lucas frowns. “Why does that matter?”
+                    </p>
+
+                    <p>
+                        Mike types fast—then demonstrates the mistake on purpose.
+                    </p>
+
+                    <pre><code># This looks like math, but it isn't:
+a = input("Enter A: ")
+b = input("Enter B: ")
+print(a + b)  # "2" + "3" becomes "23"</code></pre>
+
+                    <p>
+                        “If we type 2 and 3,” Mike explains, “Python might glue the text together: <code>"23"</code>.
+                        That’s not addition. That’s just two strings holding hands.”
+                    </p>
+
+                    <hr class="hr" />
+
+                    <p>
+                        A soft wind hits the basement window. The boys freeze.
+                        For a second, the glass reflects a figure—too pale, too still—then nothing.
+                    </p>
+
+                    <p>
+                        Mike swallows. “Okay. Real numbers. We need a conversion.”
+                    </p>
+
+                    <p>
+                        He writes: <code>int()</code> for whole numbers, or <code>float()</code> if we want decimals.
+                        “Let’s use <code>float</code>,” Dustin says. “What if the Upside Down charges taxes with
+                        decimals?”
+                    </p>
+
+                    <pre><code># 2) Convert strings to numbers
+a = float(input("Enter the first number: "))
+b = float(input("Enter the second number: "))</code></pre>
+
+                    <p>
+                        Lucas points at the variables. “So <code>a</code> and <code>b</code> are containers?”
+                    </p>
+
+                    <p>
+                        “Exactly,” Mike says. “Variables store values—like keeping two clues in your pocket.”
+                    </p>
+
+                    <hr class="hr" />
+
+                    <p>
+                        Somewhere across town, <strong>Joyce</strong> sits by the phone, staring at it like it might
+                        blink.
+                        In the woods, the air feels wrong, as if the world is buffering.
+                    </p>
+
+                    <p>
+                        Back in the basement, the boys are ready for the simplest spell in programming:
+                        take two numbers, add them, and show the result.
+                    </p>
+
+                    <pre><code># 3) Add the numbers
+sum_ = a + b
+
+# 4) Print the result (friendly output)
+print(f"Sum: {sum_}")</code></pre>
+
+                    <p>
+                        Dustin nods. “So the computer does exactly what we say.”
+                    </p>
+
+                    <p>
+                        “Yes,” Mike replies. “And only what we say. That’s why structure matters.”
+                    </p>
+
+                    <hr class="hr" />
+
+                    <p>
+                        Lucas suddenly asks, “What if someone types ‘hello’ instead of a number?”
+                    </p>
+
+                    <p>
+                        Mike pauses. “Then Python complains with an error. That’s fair.
+                        But we can be polite and catch it.”
+                    </p>
+
+                    <p>
+                        He adds a safety net—optional, but smart.
+                    </p>
+
+                    <pre><code>try:
+    a = float(input("Enter the first number: "))
+    b = float(input("Enter the second number: "))
+    print(f"Sum: {a + b}")
+except ValueError:
+    print("Please type a number (e.g., 12 or 3.5).")</code></pre>
+
+                    <p>
+                        The house creaks. The lights flicker once. The boys stare at the screen—
+                        not because the code is scary, but because it’s <em>clear</em>.
+                        Two inputs. Two conversions. One addition. One result.
+                    </p>
+
+                    <p>
+                        And in a world where something impossible has taken Will,
+                        even a small working program feels like a candle in the dark.
+                    </p>
+
+                    <hr class="hr" />
+
+                    <p><strong>Final takeaway:</strong> If you can write this program, you’ve learned the core pattern:
+                        <em>input → convert → compute → output</em>. That pattern will return again and again—like a
+                        theme song.
+                    </p>
+
+                    <pre><code># ✅ Minimal version (recommended for a first try)
+a = float(input("Enter the first number: "))
+b = float(input("Enter the second number: "))
+print(f"Sum: {a + b}")</code></pre>
+                </section>
+            </main>
+
+            <aside class="aside">
+                <h3>Study notes</h3>
+                <p class="lead">
+                    Goal: write a Python program that adds two numbers typed by the user.
+                    Remember: <code>input()</code> returns text → convert it with <code>int()</code> or
+                    <code>float()</code>.
+                </p>
+
+                <ul>
+                    <li><strong>New IT words (today):</strong> variable, input, convert, output, exception</li>
+                    <li><strong>Core pattern:</strong> input → convert → compute → print</li>
+                    <li><strong>Common mistake:</strong> no conversion ⇒ "2"+"3" becomes "23"</li>
+                </ul>
+
+                <hr class="hr" />
+
+                <h3>Phrasal verbs (5)</h3>
+                <ol>
+                    <li><strong>figure out</strong> — understand a problem</li>
+                    <li><strong>type in</strong> — enter text on the keyboard</li>
+                    <li><strong>add up</strong> — calculate the total</li>
+                    <li><strong>carry on</strong> — continue doing something</li>
+                    <li><strong>mess up</strong> — make a mistake</li>
+                </ol>
+            </aside>
+
+        </div>
+        <hr class="hr" />
+
+        <h2>Student Task</h2>
+
+        <p>
+            Write a Python program that:
+        </p>
+
+        <ol>
+            <li>Asks the user to enter <strong>two numbers</strong> using the keyboard.</li>
+            <li>Converts the inputs to <strong>numbers</strong> (<code>int</code> or <code>float</code>).</li>
+            <li>Adds the two numbers.</li>
+            <li>Displays the result in a clear message, e.g. <code>Sum: 7</code>.</li>
+        </ol>
+
+        <p><strong>Requirements:</strong></p>
+        <ul>
+            <li>Use <code>input()</code> for both values.</li>
+            <li>Store values in variables (for example: <code>a</code>, <code>b</code>).</li>
+            <li>Use <code>print()</code> to show the final sum.</li>
+            <li>Your program must work for inputs like <code>2</code> and <code>3</code> (output: <code>5</code>).</li>
+        </ul>
+
+        <pre><code># Your code goes here:</code></pre>
+
+    </div>
+</body>
+
+</html>
