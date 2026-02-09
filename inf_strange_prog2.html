@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Stranger Things S01E02 — “The Weirdo on Maple Street” (Learning Story + Python)</title>
+  <style>
+    :root{
+      --bg:#0b0f17;
+      --card:#0f1724;
+      --ink:#e9eefc;
+      --muted:#a9b4d0;
+      --line:rgba(255,255,255,.10);
+      --chip:#1c2a44;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 800px at 20% 0%, rgba(122,162,255,.15), transparent 60%),
+                  radial-gradient(900px 700px at 90% 10%, rgba(255,90,150,.12), transparent 55%),
+                  var(--bg);
+      color:var(--ink);
+      line-height:1.6;
+    }
+    .topbar{
+      position:sticky; top:0;
+      backdrop-filter: blur(10px);
+      background: rgba(11,15,23,.65);
+      border-bottom:1px solid var(--line);
+      padding:14px 18px;
+      display:flex; align-items:center; justify-content:center;
+      z-index:10;
+    }
+    .chip{
+      display:inline-flex; gap:10px; align-items:center;
+      padding:8px 12px;
+      border:1px solid var(--line);
+      background: rgba(28,42,68,.55);
+      color:var(--muted);
+      border-radius:999px;
+      font-size:13px;
+      letter-spacing:.2px;
+    }
+    .wrap{max-width:1100px; margin:0 auto; padding:18px;}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 340px;
+      gap:18px;
+      align-items:start;
+    }
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      background: rgba(15,23,36,.72);
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    header{
+      padding:18px 18px 6px 18px;
+      border-bottom:1px solid var(--line);
+    }
+    h1{
+      margin:6px 0 12px 0;
+      font-size:26px;
+      line-height:1.15;
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin:0 0 14px 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .prose{padding:18px;}
+    .prose p{margin:0 0 14px 0; color:rgba(233,238,252,.92)}
+    .hr{
+      border:0;
+      height:1px;
+      background: linear-gradient(90deg, transparent, var(--line), transparent);
+      margin:18px 0;
+    }
+    pre{
+      background: rgba(11,18,32,.85);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      overflow:auto;
+      margin:12px 0 18px 0;
+    }
+    code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:13px;
+      color: rgba(233,238,252,.95);
+    }
+
+    aside.study{
+      position:sticky; top:76px;
+      padding:18px;
+      background: rgba(15,23,36,.55);
+      border:1px solid var(--line);
+      border-radius:18px;
+    }
+    .lead{
+      margin:0 0 10px 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+    aside h3{
+      margin:0 0 10px 0;
+      font-size:16px;
+      letter-spacing:.2px;
+    }
+    aside ol, aside ul{margin:10px 0 0 20px; color:rgba(233,238,252,.90)}
+    aside li{margin:6px 0}
+    .tag{
+      display:inline-block;
+      padding:2px 8px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      color:var(--muted);
+      font-size:12px;
+      margin-left:6px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="chip">
+      <span>Episode</span>
+      <strong>Stranger Things — S01E02</strong>
+      <span class="tag">Python: if / elif / else</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="grid">
+      <main class="card">
+        <header>
+          <h1>The Rule of Maple Street</h1>
+          <p class="sub">
+            Learning Story (B1+/B2): one new Python skill per episode. Today: <code>if / elif / else</code> — making decisions.
+          </p>
+        </header>
+
+        <section class="prose">
+          <p>
+            Hawkins wakes up like nothing happened. The school bell rings, kids laugh, and teachers talk about homework.
+            But Mike’s face is pale. Lucas tries to act normal, and Dustin keeps making jokes that don’t land.
+            Will is still missing, and the silence around his name feels heavy.
+          </p>
+
+          <p>
+            After school, they ride their bikes fast, cutting through streets that suddenly feel too wide.
+            When they reach Mike’s house, the basement lights hum softly, like they’re tired of pretending.
+          </p>
+
+          <p>
+            “We need a plan,” Lucas says. “Not another guess.”
+          </p>
+
+          <p>
+            Mike opens his laptop. “Okay. Today we make rules. Real rules.”
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            That afternoon, a stranger appears on <strong>Maple Street</strong>—a girl with a shaved head,
+            a hospital gown, and eyes that watch everything. She looks like she ran away from a nightmare.
+            The boys freeze when they see her, standing near the woods like a warning sign.
+          </p>
+
+          <p>
+            Dustin whispers, “She’s… a weirdo.”
+          </p>
+
+          <p>
+            “No,” Mike replies, softer. “She’s scared.”
+          </p>
+
+          <p>
+            The girl doesn’t say much. She only shakes her head when Mike says “police.”
+            She points toward the woods like it’s a door that shouldn’t be opened.
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            Later, in the basement, the boys argue about what to do. Lucas wants to call someone.
+            Mike wants to help her. Dustin wants data. And suddenly Mike says something that sounds like coding,
+            not just fear.
+          </p>
+
+          <p>
+            “We need decisions,” he says. “In Python, decisions are made with <code>if</code>.”
+          </p>
+
+          <p>
+            Lucas crosses his arms. “Like a rule?”
+          </p>
+
+          <p>
+            “Exactly,” Mike says. “A rule with a test. If the test is true, you do one thing.
+            Otherwise, you do something else.”
+          </p>
+
+          <pre><code># A decision gate in Python:
+age = 15
+
+if age &gt;= 18:
+    print("Adult")
+else:
+    print("Teen")</code></pre>
+
+          <p>
+            Dustin points at the indentation. “Why the spaces?”
+          </p>
+
+          <p>
+            “In Python,” Mike answers, “indentation is structure. No braces. The spaces are the walls.”
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            They decide to build a tiny “rule-checker” program—something that behaves like their situation:
+            <em>if</em> the girl is safe, keep her hidden. <em>else</em>, don’t risk it.
+            But they need a simple signal—something the user can type.
+          </p>
+
+          <p>
+            “Let’s make the user choose,” Dustin says. “Type 1 for ‘safe’, 0 for ‘not safe’.”
+          </p>
+
+          <p>
+            Mike types quickly:
+          </p>
+
+          <pre><code>choice = int(input("Is it safe? Type 1 for YES, 0 for NO: "))
+
+if choice == 1:
+    print("Hide her. Keep her warm.")
+else:
+    print("Don’t trust it. Be careful.")</code></pre>
+
+          <p>
+            The basement feels colder when the program prints the second line.
+            Like the laptop knows the truth and doesn’t want to say it out loud.
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            But then Lucas notices a problem. “What if the user types 5?”
+          </p>
+
+          <p>
+            Dustin shrugs. “Then the program still chooses the <code>else</code> path. That’s… messy.”
+          </p>
+
+          <p>
+            Mike nods. “We need a third path. That’s where <code>elif</code> comes in.”
+          </p>
+
+          <pre><code>choice = int(input("Type 1 (YES) or 0 (NO): "))
+
+if choice == 1:
+    print("YES: proceed.")
+elif choice == 0:
+    print("NO: stop.")
+else:
+    print("Invalid choice. Type 1 or 0.")</code></pre>
+
+          <p>
+            “Now the program has manners,” Dustin says. “It tells you when you mess up.”
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            Across town, Joyce Byers paints letters on the wall. Her hands shake, but she keeps going.
+            In the police station, Hopper listens like he doesn’t want to believe.
+            And somewhere in the woods, the air feels wrong—like an invisible wire is buzzing.
+          </p>
+
+          <p>
+            Back in the basement, Eleven finally speaks a word that hits the room like a dropped glass.
+          </p>
+
+          <p>
+            “Will,” she says.
+          </p>
+
+          <p>
+            Mike’s breath catches. Dustin’s eyes widen.
+            Lucas looks away, because hope can feel like a trap.
+          </p>
+
+          <p>
+            Mike turns back to the screen. “Then we do the next rule,” he whispers.
+            “If we can find a sign… we keep searching. Else… we don’t stop anyway.”
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            In Hawkins, rules don’t stop monsters. But they stop panic.
+            And in Python, <code>if</code> doesn’t change reality—
+            it only helps you choose the next step, clearly.
+          </p>
+
+          <hr class="hr" />
+
+          <h2>Student Task</h2>
+          <p>
+            Write a Python program that asks the user for two numbers and then uses <code>if / elif / else</code>
+            to decide what to print:
+          </p>
+          <ol>
+            <li>Read two numbers from the keyboard.</li>
+            <li>Add them together.</li>
+            <li>If the sum is greater than 10, print: <code>Big sum</code>.</li>
+            <li>If the sum is exactly 10, print: <code>Exactly ten</code>.</li>
+            <li>Otherwise, print: <code>Small sum</code>.</li>
+            <li>Always print the numeric result as well (e.g. <code>Sum: 12</code>).</li>
+          </ol>
+
+          <hr class="hr" />
+
+          <pre><code># FINAL CODE (copy)
+
+a = float(input("Enter the first number: "))
+b = float(input("Enter the second number: "))
+
+s = a + b
+print(f"Sum: {s}")
+
+if s &gt; 10:
+    print("Big sum")
+elif s == 10:
+    print("Exactly ten")
+else:
+    print("Small sum")</code></pre>
+        </section>
+      </main>
+
+      <aside class="study">
+        <h3>Study notes</h3>
+        <p class="lead">
+          Today’s Python skill: <strong>decisions</strong> with <code>if / elif / else</code>.
+          Remember: <code>==</code> compares, and indentation (spaces) defines the block.
+        </p>
+
+        <ul>
+          <li><strong>Core idea:</strong> test → choose a path</li>
+          <li><strong>Compare with:</strong> <code>&gt;</code>, <code>&lt;</code>, <code>==</code></li>
+          <li><strong>Common mistake:</strong> forgetting indentation</li>
+          <li><strong>Mini pattern:</strong> input → compute → if/elif/else → print</li>
+        </ul>
+
+        <hr class="hr" />
+
+        <h3>Phrasal verbs (5)</h3>
+        <ol>
+          <li><strong>figure out</strong> — understand something</li>
+          <li><strong>set up</strong> — arrange / prepare</li>
+          <li><strong>hold on</strong> — wait / keep something</li>
+          <li><strong>check out</strong> — examine</li>
+          <li><strong>mess up</strong> — make a mistake</li>
+        </ol>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>
