@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Stranger Things S01E03 — “Holly, Jolly” (Learning Story + Python)</title>
+  <style>
+    :root{
+      --bg:#0b0f17;
+      --card:#0f1724;
+      --ink:#e9eefc;
+      --muted:#a9b4d0;
+      --line:rgba(255,255,255,.10);
+      --chip:#1c2a44;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 800px at 20% 0%, rgba(122,162,255,.15), transparent 60%),
+                  radial-gradient(900px 700px at 90% 10%, rgba(255,90,150,.12), transparent 55%),
+                  var(--bg);
+      color:var(--ink);
+      line-height:1.6;
+    }
+    .topbar{
+      position:sticky; top:0;
+      backdrop-filter: blur(10px);
+      background: rgba(11,15,23,.65);
+      border-bottom:1px solid var(--line);
+      padding:14px 18px;
+      display:flex; align-items:center; justify-content:center;
+      z-index:10;
+    }
+    .chip{
+      display:inline-flex; gap:10px; align-items:center;
+      padding:8px 12px;
+      border:1px solid var(--line);
+      background: rgba(28,42,68,.55);
+      color:var(--muted);
+      border-radius:999px;
+      font-size:13px;
+      letter-spacing:.2px;
+    }
+    .wrap{max-width:1100px; margin:0 auto; padding:18px;}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 340px;
+      gap:18px;
+      align-items:start;
+    }
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      background: rgba(15,23,36,.72);
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    header{
+      padding:18px 18px 6px 18px;
+      border-bottom:1px solid var(--line);
+    }
+    h1{
+      margin:6px 0 12px 0;
+      font-size:26px;
+      line-height:1.15;
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin:0 0 14px 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .prose{padding:18px;}
+    .prose p{margin:0 0 14px 0; color:rgba(233,238,252,.92)}
+    .hr{
+      border:0;
+      height:1px;
+      background: linear-gradient(90deg, transparent, var(--line), transparent);
+      margin:18px 0;
+    }
+    pre{
+      background: rgba(11,18,32,.85);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      overflow:auto;
+      margin:12px 0 18px 0;
+    }
+    code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:13px;
+      color: rgba(233,238,252,.95);
+    }
+
+    aside.study{
+      position:sticky; top:76px;
+      padding:18px;
+      background: rgba(15,23,36,.55);
+      border:1px solid var(--line);
+      border-radius:18px;
+    }
+    .lead{
+      margin:0 0 10px 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+    aside h3{
+      margin:0 0 10px 0;
+      font-size:16px;
+      letter-spacing:.2px;
+    }
+    aside ol, aside ul{margin:10px 0 0 20px; color:rgba(233,238,252,.90)}
+    aside li{margin:6px 0}
+    .tag{
+      display:inline-block;
+      padding:2px 8px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      color:var(--muted);
+      font-size:12px;
+      margin-left:6px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="chip">
+      <span>Episode</span>
+      <strong>Stranger Things — S01E03</strong>
+      <span class="tag">Python: while + try/except</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="grid">
+      <main class="card">
+        <header>
+          <h1>The Loop in the Lights</h1>
+          <p class="sub">
+            One new Python skill per episode. Today: repeat until it works — <code>while</code> + safe input with <code>try/except</code>.
+          </p>
+        </header>
+
+        <section class="prose">
+          <p>
+            Hawkins is quiet, but it doesn’t feel peaceful. It feels like the town is holding its breath.
+            In the Byers house, Joyce doesn’t sleep. She sits close to the phone and listens to the static,
+            as if it might turn into a voice.
+          </p>
+
+          <p>
+            On the walls, Christmas lights hang in messy lines. They look silly in November,
+            but Joyce doesn’t care. The lights are her map. One blink can mean “yes.”
+            Two blinks can mean “no.” A long flicker can mean “run.”
+          </p>
+
+          <p>
+            “Talk to me,” she whispers. “Just… give me a sign.”
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            In Mike’s basement, the boys watch Eleven with worried eyes.
+            She sits on the couch like a frightened animal, eating slowly.
+            Mike tries to keep his voice calm.
+          </p>
+
+          <p>
+            “We need a better system,” he says. “Something that repeats. Something that checks again and again.”
+          </p>
+
+          <p>
+            Dustin nods. “Like Joyce’s lights. She keeps asking until she gets a real answer.”
+          </p>
+
+          <p>
+            Mike smiles once—small and tired. “Exactly. In Python, that’s a <code>while</code> loop.”
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            Mike opens a blank file and writes a simple idea:
+            keep asking the user for a number until the input is correct.
+            Not because the computer is smart—because it is patient.
+          </p>
+
+          <pre><code># A loop repeats while a condition is True
+# Think: Joyce keeps asking the lights again and again.
+
+while True:
+    print("The question returns...")</code></pre>
+
+          <p>
+            Lucas leans closer. “So this never stops?”
+          </p>
+
+          <p>
+            “Not unless we break it,” Mike says. “A loop is like a hallway.
+            <code>break</code> is the door.”
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            Dustin points at the keyboard. “But people type weird things.
+            What if they type 'abc'?”
+          </p>
+
+          <p>
+            Mike nods. “Then Python throws an error. Like the lights exploding.”
+          </p>
+
+          <p>
+            He writes the safety net: <code>try/except</code>.
+            “Try the risky thing,” he explains. “If it fails, catch it and continue.”
+          </p>
+
+          <pre><code>while True:
+    try:
+        a = float(input("Enter the first number: "))
+        b = float(input("Enter the second number: "))
+        break
+    except ValueError:
+        print("Please type numbers only (example: 3 or 3.5).")</code></pre>
+
+          <p>
+            Eleven watches the screen. Her eyes are dark pools, reflecting the code like a secret.
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            Then Mike makes a mistake on purpose—to show the danger.
+            He forgets the <code>break</code>.
+          </p>
+
+          <pre><code># Controlled mistake: no break (DON'T do this)
+while True:
+    a = float(input("Enter A: "))
+    b = float(input("Enter B: "))
+    print(f"Sum: {a + b}")</code></pre>
+
+          <p>
+            Lucas laughs nervously. “So it keeps asking forever.”
+          </p>
+
+          <p>
+            “Yes,” Mike says. “Sometimes that’s useful. But today we want it to stop after success.
+            We need the door.”
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            Outside, the wind hits the windows. Joyce’s lights blink once—then twice—then flicker like a heartbeat.
+            Joyce stands up so fast her chair falls.
+          </p>
+
+          <p>
+            “Yes,” she breathes. “Yes, you’re there.”
+          </p>
+
+          <p>
+            In the basement, Mike finishes the tiny program. It feels like the same idea:
+            ask, check, repeat… until it’s real.
+          </p>
+
+          <pre><code># FINAL CODE (copy)
+
+while True:
+    try:
+        a = float(input("Enter the first number: "))
+        b = float(input("Enter the second number: "))
+        break
+    except ValueError:
+        print("Please type a number (example: 12 or 3.5).")
+
+print(f"Sum: {a + b}")</code></pre>
+
+          <p>
+            Dustin exhales. “So the loop is our patience.”
+          </p>
+
+          <p>
+            Mike nods. “And the <code>try/except</code> is our shield.”
+          </p>
+
+          <p>
+            The lights upstairs flicker again, far away.
+            In Hawkins, even answers come through static.
+            But with the right structure, you can keep asking until you get one.
+          </p>
+
+          <hr class="hr" />
+
+          <h2>Task</h2>
+          <p>
+            Create a Python program that keeps asking the user for two numbers until the input is correct.
+            Then it prints the sum.
+          </p>
+          <ol>
+            <li>Use a <code>while True</code> loop.</li>
+            <li>Inside the loop, use <code>try/except</code> to handle wrong input.</li>
+            <li>If the input is correct, stop the loop using <code>break</code>.</li>
+            <li>After the loop, print the sum like: <code>Sum: 8</code>.</li>
+          </ol>
+        </section>
+      </main>
+
+      <aside class="study">
+        <h3>Study notes</h3>
+        <p class="lead">
+          Today’s skill: keep asking until success.
+          <code>while</code> repeats. <code>break</code> exits.
+          <code>try/except</code> prevents the program from crashing.
+        </p>
+
+        <ul>
+          <li><strong>Pattern:</strong> loop → try input → if ok: break → print</li>
+          <li><strong>Common mistake:</strong> forgetting <code>break</code> (infinite loop)</li>
+          <li><strong>Use case:</strong> safe input from the user</li>
+        </ul>
+
+        <hr class="hr" />
+
+        <h3>Phrasal verbs (5)</h3>
+        <ol>
+          <li><strong>keep on</strong> — continue doing something</li>
+          <li><strong>try out</strong> — test something</li>
+          <li><strong>mess up</strong> — make a mistake</li>
+          <li><strong>break out</strong> — escape / exit suddenly</li>
+          <li><strong>hold back</strong> — stop yourself</li>
+        </ol>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>
