@@ -1,0 +1,128 @@
+<hr class="hr" />
+
+<h2>Programming Check Card — Episode 4 (Python: Lists + append + for)</h2>
+<p>
+  <strong>Goal:</strong> Check if you understand how to collect numbers in a list and calculate the total.<br />
+  <strong>Instructions:</strong> Answer in English. Write short answers. For code tasks, write clean Python code.<br />
+  <strong>Total:</strong> 20 points
+</p>
+
+<hr class="hr" />
+
+<h3>Part A — Quick Concepts (8 points)</h3>
+<ol>
+  <li>
+    What is a <strong>list</strong> in Python? (1 sentence)
+    <br />Answer: ________________________________________________
+  </li>
+  <li>
+    How do you create an empty list? (write the code)
+    <br />Answer: <code>________________________________</code>
+  </li>
+  <li>
+    What does <code>append()</code> do? (1 sentence)
+    <br />Answer: ________________________________________________
+  </li>
+  <li>
+    Write a <code>for</code> loop header that runs exactly 3 times.
+    <br />Answer: <code>________________________________</code>
+  </li>
+  <li>
+    Why do we use <code>float()</code> or <code>int()</code> after <code>input()</code>?
+    <br />Answer: ________________________________________________
+  </li>
+  <li>
+    What is the difference between these two loops?
+    <br /><code>for i in range(3):</code> and <code>for x in numbers:</code>
+    <br />Answer: ________________________________________________
+  </li>
+</ol>
+
+<hr class="hr" />
+
+<h3>Part B — Read the Code (6 points)</h3>
+<p>Look at the code and answer the questions.</p>
+
+<pre><code>numbers = []
+
+for i in range(3):
+    x = float(input(f"Enter number #{i+1}: "))
+    numbers.append(x)
+
+total = 0
+for x in numbers:
+    total += x
+
+print(f"Total: {total}")</code></pre>
+
+<ol start="7">
+  <li>
+    What is stored inside <code>numbers</code> after the first loop?
+    <br />Answer: ________________________________________________
+  </li>
+  <li>
+    What is the value of <code>total</code> before the second loop starts?
+    <br />Answer: ________________________________________________
+  </li>
+  <li>
+    What does <code>total += x</code> mean? (explain in words)
+    <br />Answer: ________________________________________________
+  </li>
+  <li>
+    If the user types <code>2</code>, <code>3</code>, <code>5</code>, what will be printed?
+    <br />Answer: ________________________________________________
+  </li>
+</ol>
+
+<hr class="hr" />
+
+<h3>Part C — Fix the Bug (3 points)</h3>
+<p>The code below is wrong. Write what is wrong and how to fix it.</p>
+
+<pre><code>numbers = []
+for i in range(3):
+    x = input("Enter a number: ")
+    numbers.append(x)
+
+total = 0
+for x in numbers:
+    total += x
+
+print("Total:", total)</code></pre>
+
+<ol start="11">
+  <li>
+    What is wrong?
+    <br />Answer: ________________________________________________
+  </li>
+  <li>
+    How to fix it? (write 1–2 corrected lines)
+    <br />Answer:
+    <pre><code>________________________________
+________________________________</code></pre>
+  </li>
+</ol>
+
+<hr class="hr" />
+
+<h3>Part D — Mini Coding Task (3 points)</h3>
+<p>
+  Write a Python program that:
+  <br />- asks the user for <strong>5 numbers</strong>
+  <br />- stores them in a list
+  <br />- prints the total like: <code>Total: 42</code>
+</p>
+
+<pre><code># Write your code here:</code></pre>
+
+<hr class="hr" />
+
+<h3>Teacher Checklist (optional)</h3>
+<ul>
+  <li>Student uses <code>numbers = []</code></li>
+  <li>Student uses <code>for i in range(5)</code></li>
+  <li>Student converts input to <code>float</code> or <code>int</code></li>
+  <li>Student uses <code>append()</code></li>
+  <li>Student sums values using a loop (or correct alternative)</li>
+  <li>Student prints <code>Total: ...</code></li>
+</ul>

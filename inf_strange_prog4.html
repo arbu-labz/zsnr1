@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Stranger Things S01E04 — “The Body” (Learning Story + Python)</title>
+  <style>
+    :root{
+      --bg:#0b0f17;
+      --card:#0f1724;
+      --ink:#e9eefc;
+      --muted:#a9b4d0;
+      --line:rgba(255,255,255,.10);
+      --chip:#1c2a44;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 800px at 20% 0%, rgba(122,162,255,.15), transparent 60%),
+                  radial-gradient(900px 700px at 90% 10%, rgba(255,90,150,.12), transparent 55%),
+                  var(--bg);
+      color:var(--ink);
+      line-height:1.6;
+    }
+    .topbar{
+      position:sticky; top:0;
+      backdrop-filter: blur(10px);
+      background: rgba(11,15,23,.65);
+      border-bottom:1px solid var(--line);
+      padding:14px 18px;
+      display:flex; align-items:center; justify-content:center;
+      z-index:10;
+    }
+    .chip{
+      display:inline-flex; gap:10px; align-items:center;
+      padding:8px 12px;
+      border:1px solid var(--line);
+      background: rgba(28,42,68,.55);
+      color:var(--muted);
+      border-radius:999px;
+      font-size:13px;
+      letter-spacing:.2px;
+    }
+    .wrap{max-width:1100px; margin:0 auto; padding:18px;}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 340px;
+      gap:18px;
+      align-items:start;
+    }
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      background: rgba(15,23,36,.72);
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    header{
+      padding:18px 18px 6px 18px;
+      border-bottom:1px solid var(--line);
+    }
+    h1{
+      margin:6px 0 12px 0;
+      font-size:26px;
+      line-height:1.15;
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin:0 0 14px 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .prose{padding:18px;}
+    .prose p{margin:0 0 14px 0; color:rgba(233,238,252,.92)}
+    .hr{
+      border:0;
+      height:1px;
+      background: linear-gradient(90deg, transparent, var(--line), transparent);
+      margin:18px 0;
+    }
+    pre{
+      background: rgba(11,18,32,.85);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      overflow:auto;
+      margin:12px 0 18px 0;
+    }
+    code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:13px;
+      color: rgba(233,238,252,.95);
+    }
+
+    aside.study{
+      position:sticky; top:76px;
+      padding:18px;
+      background: rgba(15,23,36,.55);
+      border:1px solid var(--line);
+      border-radius:18px;
+    }
+    .lead{
+      margin:0 0 10px 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+    aside h3{
+      margin:0 0 10px 0;
+      font-size:16px;
+      letter-spacing:.2px;
+    }
+    aside ol, aside ul{margin:10px 0 0 20px; color:rgba(233,238,252,.90)}
+    aside li{margin:6px 0}
+    .tag{
+      display:inline-block;
+      padding:2px 8px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      color:var(--muted);
+      font-size:12px;
+      margin-left:6px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="chip">
+      <span>Episode</span>
+      <strong>Stranger Things — S01E04</strong>
+      <span class="tag">Python: lists + append + for</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="grid">
+      <main class="card">
+        <header>
+          <h1>The List of Clues</h1>
+          <p class="sub">
+            One new Python skill per episode. Today: collecting data with a <code>list</code>, using <code>append()</code>, and summing with a <code>for</code> loop.
+          </p>
+        </header>
+
+        <section class="prose">
+          <p>
+            The news spreads fast in Hawkins. People whisper in grocery store aisles.
+            They stop talking when someone walks too close.
+            Then it becomes official: they found a body in the water.
+          </p>
+
+          <p>
+            Mike hears it and feels his chest tighten. Lucas goes quiet.
+            Dustin looks away. None of them want to say the thought out loud:
+            <em>What if it’s Will?</em>
+          </p>
+
+          <p>
+            But Eleven shakes her head hard. “No,” she says.
+            One word, sharp like a nail.
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            Hopper doesn’t trust the story either. The photos look wrong.
+            The timing feels wrong. The whole thing smells like someone trying to close a case too quickly.
+            So he does what he always does when a town lies:
+            he starts collecting details.
+          </p>
+
+          <p>
+            “We need a list,” he mutters. “A real list.”
+          </p>
+
+          <p>
+            Joyce also makes a list, even if she doesn’t call it that.
+            She circles letters on the wall. She writes down which lights blink.
+            She keeps track, because memory isn’t safe anymore.
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            In the basement, Mike opens the laptop again.
+            “We already know input,” he says. “We already know decisions and loops.”
+            Dustin nods. “So what’s next?”
+          </p>
+
+          <p>
+            Mike points at the notebook full of scribbles. “Next is collecting more than one thing.
+            In Python, we do that with a <code>list</code>.”
+          </p>
+
+          <p>
+            He types:
+          </p>
+
+          <pre><code># A list can store many values in one place
+clues = []</code></pre>
+
+          <p>
+            Lucas watches. “So it’s like a box where we throw evidence.”
+          </p>
+
+          <p>
+            “Exactly,” Mike says. “And when we find a new clue, we add it with <code>append()</code>.”
+          </p>
+
+          <pre><code>clues.append("A light blinked twice")
+clues.append("The phone made static")
+clues.append("Eleven said: No")</code></pre>
+
+          <p>
+            Dustin grins. “So now we can keep adding.”
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            But today they need something simple and practical: numbers.
+            Mike wants the program to ask for three “signal strengths” — like three readings from a radio.
+            If the signals add up to something big, it means “keep searching.”
+            If they are small, maybe it was just noise.
+          </p>
+
+          <p>
+            “We’ll take three numbers,” Mike says. “Put them in a list. Then sum them.”
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            Dustin makes a classic mistake first. He tries to put numbers into a list without converting.
+            The list becomes a list of strings, and the total becomes nonsense.
+          </p>
+
+          <pre><code># Controlled mistake: inputs are strings (DON'T do this)
+signals = []
+signals.append(input("Signal #1: "))
+signals.append(input("Signal #2: "))
+signals.append(input("Signal #3: "))</code></pre>
+
+          <p>
+            Lucas squints. “So what’s wrong?”
+          </p>
+
+          <p>
+            Mike taps the screen. “We forgot conversion. Always convert when you need real numbers.”
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            He fixes it. Three inputs. Three numbers. One list.
+          </p>
+
+          <pre><code>signals = []
+
+for i in range(3):
+    x = float(input(f"Signal #{i+1}: "))
+    signals.append(x)</code></pre>
+
+          <p>
+            “Now we have three values,” Dustin says. “But how do we add them?”
+          </p>
+
+          <p>
+            Mike points at the next step: a loop that walks through the list.
+            “A <code>for</code> loop,” he says. “Like checking each clue one by one.”
+          </p>
+
+          <pre><code>total = 0
+for x in signals:
+    total += x</code></pre>
+
+          <p>
+            The basement light flickers once, like it approves.
+          </p>
+
+          <hr class="hr" />
+
+          <p>
+            In the Byers house, Joyce stares at the wall of lights.
+            She doesn’t know Python, but she understands patterns:
+            one blink, then another, then another—
+            the same action repeated until it becomes meaning.
+          </p>
+
+          <p>
+            In the quarry, Hopper looks at the “body” again.
+            His instincts scream: something doesn’t add up.
+          </p>
+
+          <p>
+            In the basement, Mike prints the result:
+          </p>
+
+          <pre><code>print(f"Total signal: {total}")</code></pre>
+
+          <p>
+            “So,” Lucas says, “a list is how we keep the evidence together.”
+          </p>
+
+          <p>
+            Mike nods. “Yeah. Because one clue is easy to ignore.
+            But a list of clues… that’s harder to erase.”
+          </p>
+
+          <hr class="hr" />
+
+          <h2>Student Task</h2>
+          <p>
+            Write a Python program that collects <strong>three numbers</strong> from the user into a list and then prints their sum.
+          </p>
+          <ol>
+            <li>Create an empty list.</li>
+            <li>Use a <code>for</code> loop with <code>range(3)</code> to ask for 3 numbers.</li>
+            <li>Convert each input to a number (<code>float</code> is fine) and add it to the list using <code>append()</code>.</li>
+            <li>Use another <code>for</code> loop to calculate the total sum of the numbers.</li>
+            <li>Print the result like: <code>Total: 15</code>.</li>
+          </ol>
+
+          <hr class="hr" />
+
+          <pre><code># FINAL CODE (copy)
+
+numbers = []
+
+for i in range(3):
+    x = float(input(f"Enter number #{i+1}: "))
+    numbers.append(x)
+
+total = 0
+for x in numbers:
+    total += x
+
+print(f"Total: {total}")</code></pre>
+        </section>
+      </main>
+
+      <aside class="study">
+        <h3>Study notes</h3>
+        <p class="lead">
+          Today’s skill: store many values in a <code>list</code>.
+          Add items with <code>append()</code>. Walk through the list with a <code>for</code> loop.
+        </p>
+
+        <ul>
+          <li><strong>List:</strong> <code>numbers = []</code></li>
+          <li><strong>Add item:</strong> <code>numbers.append(x)</code></li>
+          <li><strong>Loop:</strong> <code>for i in range(3):</code></li>
+          <li><strong>Sum:</strong> start with <code>total = 0</code>, then <code>total += x</code></li>
+          <li><strong>Common mistake:</strong> forgetting conversion (strings instead of numbers)</li>
+        </ul>
+
+        <hr class="hr" />
+
+        <h3>Phrasal verbs (5)</h3>
+        <ol>
+          <li><strong>write down</strong> — record on paper</li>
+          <li><strong>add in</strong> — include an extra thing</li>
+          <li><strong>look into</strong> — investigate</li>
+          <li><strong>rule out</strong> — decide something is not possible</li>
+          <li><strong>put together</strong> — assemble / combine</li>
+        </ol>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>
