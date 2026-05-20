@@ -16,7 +16,7 @@ window.addEventListener("keydown", e => {
     const key = e.key.toLowerCase();
     keys[key] = true;
 
-    if (gameOver) {
+    if (gameOver || levelCompleted) {
         return;
     }
 
@@ -357,6 +357,7 @@ let iPressed = false;
 let wrongLinks = 0;
 const WRONG_LINK_LIMIT = 3;
 let gameOver = false;
+let levelCompleted = false;
 
 function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -370,6 +371,11 @@ function showTemporaryMessage(text, time = 90) {
 function update() {
     if (gameOver) {
         message = "GAME OVER — popełniono 3 błędne połączenia.";
+        return;
+    }
+
+    if (levelCompleted) {
+        message = "LEVEL 1 UKOŃCZONY — certyfikat Junior Programisty przyznany.";
         return;
     }
 
@@ -606,7 +612,10 @@ function storageAction() {
     carriedObject = null;
 
     if (storedRepairedCores.length >= cores.length) {
-        showTemporaryMessage("Wszystkie rdzenie zdeponowane — etap ukończony!", 180);
+        levelCompleted = true;
+        diagnosticOpen = false;
+        instructionOpen = false;
+        showTemporaryMessage("LEVEL 1 UKOŃCZONY — certyfikat przyznany.", 9999);
     } else {
         showTemporaryMessage(`Rdzeń zdeponowany. Postęp: ${storedRepairedCores.length} / ${cores.length}.`, 120);
     }
@@ -1049,6 +1058,11 @@ function dropCarriedObject() {
     const startY = player.y + player.h + 6;
 
     const freePos = findFreeDropPosition(obj, startX, startY);
+
+    if (!freePos) {
+        showTemporaryMessage("Nie można tutaj odłożyć obiektu.", 90);
+        return;
+    }
 
     obj.x = freePos.x;
     obj.y = freePos.y;
@@ -1497,6 +1511,8 @@ function getDropBlockingObjects(excludedObject) {
 }
 
 function findFreeDropPosition(obj, startX, startY) {
+    const playerWasInsideLab = isPlayerInsideLab();
+
     const positions = [
         { x: startX, y: startY },
         { x: startX + 45, y: startY },
@@ -1509,7 +1525,8 @@ function findFreeDropPosition(obj, startX, startY) {
         { x: startX - 45, y: startY - 45 },
         { x: startX + 90, y: startY },
         { x: startX - 90, y: startY },
-        { x: startX, y: startY + 90 }
+        { x: startX, y: startY + 90 },
+        { x: startX, y: startY - 90 }
     ];
 
     for (const pos of positions) {
@@ -1520,27 +1537,57 @@ function findFreeDropPosition(obj, startX, startY) {
             h: obj.h
         };
 
-        if (collidesWithLab(testRect)) {
+        if (!isValidDropRect(testRect, obj, playerWasInsideLab)) {
             continue;
         }
 
-        let blocked = false;
+        return pos;
+    }
 
-        for (const other of getDropBlockingObjects(obj)) {
-            const collisionRect = getCollisionRect(other);
+    return null;
+}
 
-            if (rectsOverlapWithPadding(testRect, collisionRect, 12)) {
-                blocked = true;
-                break;
-            }
-        }
+function isValidDropRect(testRect, droppedObject, playerWasInsideLab) {
+    // 1. Granice planszy
+    if (
+        testRect.x < 0 ||
+        testRect.y < HUD_HEIGHT + 10 ||
+        testRect.x + testRect.w > world.width ||
+        testRect.y + testRect.h > world.height
+    ) {
+        return false;
+    }
 
-        if (!blocked) {
-            return pos;
+    // 2. Jeśli gracz jest w laboratorium, obiekt też musi zostać w laboratorium
+    if (playerWasInsideLab && !isRectInsideLab(testRect)) {
+        return false;
+    }
+
+    // 3. Jeśli gracz jest poza laboratorium, nie odkładamy obiektu do środka przez ścianę
+    if (!playerWasInsideLab && isRectInsideLab(testRect)) {
+        return false;
+    }
+
+    // 4. Obiekt nie może nachodzić na ściany laboratorium
+    if (collidesWithLab(testRect)) {
+        return false;
+    }
+
+    // 5. Obiekt nie może nachodzić na box, terminal, magazyn ani inne obiekty
+    for (const other of getDropBlockingObjects(droppedObject)) {
+        const collisionRect = getCollisionRect(other);
+
+        if (rectsOverlapWithPadding(testRect, collisionRect, 12)) {
+            return false;
         }
     }
 
-    return { x: startX, y: startY };
+    // 6. Obiekt nie może zostać położony na graczu
+    if (rectsOverlapWithPadding(testRect, player, 8)) {
+        return false;
+    }
+
+    return true;
 }
 
 function draw() {
@@ -1624,9 +1671,77 @@ function draw() {
         drawGameOverWindow();
     }
 
+    if (levelCompleted) {
+        drawLevelCompleteWindow();
+    }
+
     if (scanPopupTimer > 0) {
         drawScanPopup();
     }
+}
+
+function drawLevelCompleteWindow() {
+    const w = 720;
+    const h = 430;
+    const x = canvas.width / 2 - w / 2;
+    const y = canvas.height / 2 - h / 2;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    // przyciemnienie tła
+    ctx.fillStyle = "rgba(0, 0, 0, 0.68)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // karta certyfikatu
+    ctx.fillStyle = "#08111f";
+    roundRect(x, y, w, h, 22);
+    ctx.fill();
+
+    ctx.strokeStyle = "#b6ff6b";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // mała ramka wewnętrzna
+    ctx.strokeStyle = "rgba(121, 255, 225, 0.45)";
+    ctx.lineWidth = 2;
+    roundRect(x + 22, y + 22, w - 44, h - 44, 16);
+    ctx.stroke();
+
+    ctx.fillStyle = "#b6ff6b";
+    ctx.font = "34px Arial";
+    ctx.fillText("LEVEL 1 UKOŃCZONY", x + 205, y + 72);
+
+    ctx.fillStyle = "#79ffe1";
+    ctx.font = "22px Arial";
+    ctx.fillText("Certyfikat ukończenia etapu", x + 220, y + 118);
+
+    // główny tekst certyfikatu
+    ctx.fillStyle = "#c8fff4";
+    ctx.font = "18px Arial";
+    ctx.fillText("Uczeń pomyślnie naprawił wszystkie rdzenie systemowe,", x + 105, y + 170);
+    ctx.fillText("dopasował moduły kodu i zabezpieczył laboratorium.", x + 135, y + 200);
+
+    ctx.fillStyle = "#fef3c7";
+    ctx.font = "28px Arial";
+    ctx.fillText("JUNIOR PROGRAMISTA MAUI", x + 175, y + 265);
+
+    // ozdobny znaczek
+    ctx.fillStyle = "#14532d";
+    ctx.beginPath();
+    ctx.arc(x + w / 2, y + 330, 42, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = "#b6ff6b";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    ctx.fillStyle = "#b6ff6b";
+    ctx.font = "36px Arial";
+    ctx.fillText("✓", x + w / 2 - 12, y + 343);
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "15px Arial";
+    ctx.fillText("Odśwież stronę, aby rozpocząć ponownie.", x + 238, y + h - 32);
 }
 
 function drawGameOverWindow() {
