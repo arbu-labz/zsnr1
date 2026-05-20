@@ -11,9 +11,14 @@ resize();
 
 const keys = {};
 const HUD_HEIGHT = 56;
+
 window.addEventListener("keydown", e => {
     const key = e.key.toLowerCase();
     keys[key] = true;
+
+    if (gameOver) {
+        return;
+    }
 
     if (key === "e" && !ePressed) {
         ePressed = true;
@@ -22,7 +27,55 @@ window.addEventListener("keydown", e => {
 
     if (key === "r" && !rPressed) {
         rPressed = true;
-        repairBoxAction();
+
+        if (isPlayerNearRect(handScanner, 90)) {
+            scannerSlotAction();
+        } else {
+            repairBoxAction();
+        }
+    }
+
+    if (key === "g" && !dPressed) {
+        dPressed = true;
+
+        if (isPlayerNearRect(handScanner, 90)) {
+            scanScannerSlot();
+        } else {
+            diagnosticAction();
+        }
+    }
+
+    if (key === "1") {
+        takeObjectFromRepairBox(0);
+    }
+
+    if (key === "2") {
+        takeObjectFromRepairBox(1);
+    }
+
+    if (key === "3") {
+        takeObjectFromRepairBox(2);
+    }
+
+    if (key === "escape") {
+        diagnosticOpen = false;
+        instructionOpen = false;
+    }
+
+    if (key === "l" && !lPressed) {
+        lPressed = true;
+        linkAction();
+    }
+
+    if (key === " " && !spacePressed) {
+        e.preventDefault();
+        spacePressed = true;
+        throwCarriedObject();
+    }
+    if (key === "i" && !iPressed) {
+        iPressed = true;
+        instructionOpen = true;
+        diagnosticOpen = false;
     }
 });
 
@@ -36,6 +89,22 @@ window.addEventListener("keyup", e => {
 
     if (key === "r") {
         rPressed = false;
+    }
+
+    if (key === "g") {
+        dPressed = false;
+    }
+
+    if (key === "l") {
+        lPressed = false;
+    }
+
+    if (key === "i") {
+        iPressed = false;
+    }
+
+    if (key === " ") {
+        spacePressed = false;
     }
 });
 
@@ -70,13 +139,184 @@ const terminalDesk = {
     label: "Terminal diagnostyczny"
 };
 
-const damagedCore = {
-    x: 640,
-    y: 760,
-    w: 36,
-    h: 36,
-    label: "Uszkodzony rdzeń"
+const coreStorage = {
+    x: 1420,
+    y: 600,
+    w: 170,
+    h: 310,
+    label: "Magazyn rdzeni"
 };
+
+const handScanner = {
+    x: 1330,
+    y: 500,
+    w: 70,
+    h: 52,
+    label: "Ręczny skaner",
+    kind: "scanner"
+};
+
+let scannerSlot = null;
+let scanPopupText = "";
+let scanPopupTimer = 0;
+
+function createPrankRobot(x, y) {
+    return {
+        x: x,
+        y: y,
+        w: 48,
+        h: 42,
+        speed: 1.8,
+        target: null,
+        pushDirX: 0,
+        pushDirY: 0,
+        pushTimer: 0,
+        waitTimer: 0,
+        skippedTarget: null,
+        skipTimer: 0,
+        escapeTimer: 0,
+        escapeDirX: 0,
+        escapeDirY: 0
+    };
+}
+
+const prankRobots = [
+    createPrankRobot(1750, 760),
+    createPrankRobot(2050, 1050),
+    createPrankRobot(2350, 1360)
+];
+
+function getLabCenter() {
+    return {
+        x: lab.x + lab.w / 2,
+        y: lab.y + lab.h / 2
+    };
+}
+
+function getObjectCenter(obj) {
+    return {
+        x: obj.x + obj.w / 2,
+        y: obj.y + obj.h / 2
+    };
+}
+
+function normalizeVector(x, y) {
+    const len = Math.hypot(x, y);
+
+    if (len === 0) {
+        return { x: 1, y: 0 };
+    }
+
+    return {
+        x: x / len,
+        y: y / len
+    };
+}
+
+function getPushDirectionToNearestEdge(obj) {
+    const directions = [
+        { dirX: -1, dirY: 0 }, // lewo
+        { dirX: 1, dirY: 0 },  // prawo
+        { dirX: 0, dirY: -1 }, // góra
+        { dirX: 0, dirY: 1 }   // dół
+    ];
+
+    // mieszamy kierunki, żeby robot nie pchał zawsze w tę samą stronę
+    directions.sort(() => Math.random() - 0.5);
+
+    for (const dir of directions) {
+        if (canMoveObject(obj, dir.dirX * 20, dir.dirY * 20)) {
+            return dir;
+        }
+    }
+
+    // awaryjnie, gdy nic nie pasuje
+    return { dirX: 0, dirY: 1 };
+}
+
+function getPrankRobotTargetCandidates() {
+    return getPhysicalObjects().filter(obj => {
+        const rect = getCollisionRect(obj);
+
+        return !isRectInsideLab(rect) && !isThrown(obj);
+    });
+}
+
+function choosePrankRobotTarget(robot) {
+    let candidates = getPrankRobotTargetCandidates();
+
+    if (robot.skippedTarget && robot.skipTimer > 0) {
+        candidates = candidates.filter(obj => obj !== robot.skippedTarget);
+    }
+
+    if (candidates.length === 0) {
+        robot.target = null;
+        robot.waitTimer = 30;
+        return;
+    }
+
+    const target = candidates[Math.floor(Math.random() * candidates.length)];
+    const pushDir = getPushDirectionToNearestEdge(target);
+
+    robot.target = target;
+    robot.pushDirX = pushDir.dirX;
+    robot.pushDirY = pushDir.dirY;
+    robot.pushTimer = 0;
+}
+
+const CORE_SIZE = 36;
+const WORD_SIZE = 34;
+
+const CORE_START_X = 280;
+const WORD_START_X = 380;
+
+const OBJECT_START_Y = 300;
+const OBJECT_GAP_Y = 70;
+
+const cores = GAME_CONTENT.cores.map((obj, index) => ({
+    ...obj,
+    label: "Rdzeń",
+    x: CORE_START_X,
+    y: OBJECT_START_Y + index * OBJECT_GAP_Y,
+    w: CORE_SIZE,
+    h: CORE_SIZE,
+    kind: "core",
+    repaired: false,
+    removed: false
+}));
+
+function shuffledIndexes(count) {
+    const indexes = [];
+
+    for (let i = 0; i < count; i++) {
+        indexes.push(i);
+    }
+
+    for (let i = indexes.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indexes[i], indexes[j]] = [indexes[j], indexes[i]];
+    }
+
+    return indexes;
+}
+
+const wordDisplayOrder = shuffledIndexes(GAME_CONTENT.wordObjects.length);
+
+const wordObjects = GAME_CONTENT.wordObjects.map((obj, index) => {
+    const displayIndex = wordDisplayOrder[index];
+
+    return {
+        ...obj,
+        label: "Moduł",
+        x: WORD_START_X,
+        y: OBJECT_START_Y + displayIndex * OBJECT_GAP_Y,
+        w: WORD_SIZE,
+        h: WORD_SIZE,
+        kind: "word"
+    };
+});
+
+const repairedCores = [];
 
 const camera = {
     x: 0,
@@ -100,13 +340,44 @@ let message = "Laboratorium Anomalii — test mapy i ruchu";
 let carriedObject = null;
 let ePressed = false;
 let rPressed = false;
-let coreInRepairBox = false;
+const REPAIR_BOX_MAX = 3;
+let repairBoxSlots = [];
+let storedRepairedCores = [];
+let removedObjects = [];
+let diagnosticOpen = false;
+let dPressed = false;
+let lPressed = false;
+let linkErrorFlash = 0;
+let temporaryMessage = null;
+let temporaryMessageTimer = 0;
+let thrownObjects = [];
+let spacePressed = false;
+let instructionOpen = false;
+let iPressed = false;
+let wrongLinks = 0;
+const WRONG_LINK_LIMIT = 3;
+let gameOver = false;
 
 function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
+function showTemporaryMessage(text, time = 90) {
+    temporaryMessage = text;
+    temporaryMessageTimer = time;
+}
+
 function update() {
+    if (gameOver) {
+        message = "GAME OVER — popełniono 3 błędne połączenia.";
+        return;
+    }
+
+    if (instructionOpen) {
+        message = "Instrukcja gry — ESC: zamknij.";
+        return;
+    }
+
     let dx = 0;
     let dy = 0;
 
@@ -130,6 +401,10 @@ function update() {
     }
 
     movePlayer(dx * player.speed, dy * player.speed);
+    updateThrownObjects();
+    for (const robot of prankRobots) {
+        updatePrankRobot(robot);
+    }
 
     if (carriedObject) {
         const carriedScale = 0.5;
@@ -144,51 +419,94 @@ function update() {
     camera.x = clamp(camera.x, 0, Math.max(0, world.width - canvas.width));
     camera.y = clamp(camera.y, 0, Math.max(0, world.height - canvas.height));
 
+    if (linkErrorFlash > 0) {
+        linkErrorFlash--;
+    }
+
+    if (temporaryMessageTimer > 0) {
+        temporaryMessageTimer--;
+    }
+
+    if (scanPopupTimer > 0) {
+        scanPopupTimer--;
+    }
+
     updateMessage();
 }
 
 function updateMessage() {
-    if (carriedObject && isPlayerNearRect(repairBox, 110)) {
-        message = "Box naprawczy — R: włóż rdzeń do boxu. E: upuść.";
+    if (temporaryMessageTimer > 0 && temporaryMessage) {
+        message = temporaryMessage;
         return;
     }
 
-    if (!carriedObject && coreInRepairBox && isPlayerNearRect(repairBox, 110)) {
-        message = "Box naprawczy — rdzeń w komorze. R: wyjmij.";
+    if (carriedObject && isPlayerNearRect(repairBox, 110)) {
+        message = `Box naprawczy — R: włóż ${carriedObject.label}. E: upuść.`;
+        return;
+    }
+
+    if (!carriedObject && isPlayerNearRect(repairBox, 110)) {
+        if (repairBoxSlots.length > 0) {
+            message = "Box naprawczy — 1 / 2 / 3: wyjmij obiekt ze slotu.";
+        } else {
+            message = "Box naprawczy — pusty.";
+        }
         return;
     }
 
     if (carriedObject) {
-        message = "Niesiesz uszkodzony rdzeń. E — upuść.";
+        message = `Niesiesz: ${carriedObject.label}. E — upuść.`;
         return;
     }
 
-    if (!coreInRepairBox && isPlayerNearRect(damagedCore, 70)) {
-        message = "Uszkodzony rdzeń — E: podnieś.";
+    const nearestCore = getNearestCore();
+
+    if (nearestCore) {
+        message = `${nearestCore.label} — E: podnieś.`;
         return;
     }
 
-    if (isPlayerNearRect(repairBox, 90)) {
-        message = "Box naprawczy — tu umieścisz uszkodzony obiekt.";
+    const nearestWord = getNearestWordObject();
+
+    if (nearestWord) {
+        message = `${nearestWord.label} — E: podnieś.`;
+        return;
+    }
+
+    if (isPlayerNearRect(coreStorage, 110)) {
+        if (carriedObject && carriedObject.kind === "repairedCore") {
+            message = "Magazyn rdzeni — R: zdeponuj naprawiony rdzeń.";
+        } else {
+            message = `Magazyn rdzeni — postęp: ${storedRepairedCores.length} / ${cores.length}.`;
+        }
         return;
     }
 
     if (isPlayerNearRect(terminalDesk, 110)) {
-        if (coreInRepairBox) {
-            message = "Terminal — wykryto rdzeń w boxie. Diagnostyka będzie kolejnym krokiem.";
+        if (repairBoxSlots.length > 0) {
+            message = `Terminal — wykryto obiekty: ${repairBoxSlots.length}. G: diagnostyka, L: link.`;
         } else {
-            message = "Terminal — brak obiektu w boxie naprawczym.";
+            message = "Terminal — box jest pusty.";
         }
         return;
     }
 
     if (isPlayerInsideLab()) {
-        message = "Jesteś w laboratorium — box i terminal czekają na pierwszy obiekt.";
+        message = "Jesteś w laboratorium — box i terminal czekają na obiekty.";
         return;
     }
 
     if (isPlayerNearLabDoor()) {
         message = "Wejście do laboratorium — przejdź przez drzwi.";
+        return;
+    }
+
+    if (isPlayerNearRect(handScanner, 90)) {
+        if (scannerSlot) {
+            message = "Ręczny skaner — R: wyjmij obiekt, G: skanuj.";
+        } else {
+            message = "Ręczny skaner — R: włóż obiekt, E: podnieś.";
+        }
         return;
     }
 
@@ -201,51 +519,750 @@ function interact() {
         return;
     }
 
-    if (!coreInRepairBox && isPlayerNearRect(damagedCore, 70)) {
-        carriedObject = damagedCore;
-        message = "Podniesiono uszkodzony rdzeń.";
+    if (
+        carriedObject !== handScanner &&
+        scannerSlot !== handScanner &&
+        isPlayerNearRect(handScanner, 70)
+    ) {
+        carriedObject = handScanner;
+        message = "Podniesiono: ręczny skaner.";
+        return;
+    }
+
+    const nearestCore = getNearestCore();
+
+    const nearestRepaired = getNearestRepairedCore();
+
+    if (nearestRepaired) {
+        carriedObject = nearestRepaired;
+        message = `Podniesiono: ${nearestRepaired.label}.`;
+        return;
+    }
+
+    if (nearestCore) {
+        carriedObject = nearestCore;
+        message = `Podniesiono: ${nearestCore.label}.`;
+        return;
+    }
+
+    const nearestWord = getNearestWordObject();
+
+    if (nearestWord) {
+        carriedObject = nearestWord;
+        message = `Podniesiono: ${nearestWord.label}.`;
+        return;
     }
 }
 
 function repairBoxAction() {
+    if (isPlayerNearRect(coreStorage, 110)) {
+        storageAction();
+        return;
+    }
+
     if (!isPlayerNearRect(repairBox, 110)) {
         return;
     }
 
-    if (carriedObject === damagedCore && !coreInRepairBox) {
-        putCoreIntoRepairBox();
+    if (!carriedObject) {
+        message = "Box naprawczy — wybierz slot 1 / 2 / 3, aby wyjąć obiekt.";
         return;
     }
 
-    if (!carriedObject && coreInRepairBox) {
-        takeCoreFromRepairBox();
+    if (carriedObject.kind === "core") {
+        putObjectIntoRepairBox(carriedObject);
         return;
+    }
+
+    if (carriedObject.kind === "word") {
+        putObjectIntoRepairBox(carriedObject);
+        return;
+    }
+
+    if (carriedObject.kind === "repairedCore") {
+        putObjectIntoRepairBox(carriedObject);
+        return;
+    }
+}
+
+function storageAction() {
+    if (!carriedObject) {
+        message = `Magazyn rdzeni — zdeponowano ${storedRepairedCores.length} / ${cores.length}.`;
+        return;
+    }
+
+    if (carriedObject.kind !== "repairedCore") {
+        showTemporaryMessage("Magazyn przyjmuje tylko naprawione rdzenie.", 100);
+        return;
+    }
+
+    storedRepairedCores.push(carriedObject);
+
+    const index = repairedCores.indexOf(carriedObject);
+    if (index !== -1) {
+        repairedCores.splice(index, 1);
+    }
+
+    carriedObject = null;
+
+    if (storedRepairedCores.length >= cores.length) {
+        showTemporaryMessage("Wszystkie rdzenie zdeponowane — etap ukończony!", 180);
+    } else {
+        showTemporaryMessage(`Rdzeń zdeponowany. Postęp: ${storedRepairedCores.length} / ${cores.length}.`, 120);
+    }
+}
+
+function isInRepairBox(obj) {
+    return repairBoxSlots.includes(obj);
+}
+
+function isInScanner(obj) {
+    return scannerSlot === obj;
+}
+
+function isRemoved(obj) {
+    return removedObjects.includes(obj);
+}
+
+function isThrown(obj) {
+    return thrownObjects.some(t => t.obj === obj);
+}
+
+function getNearestWordObject(range = 70) {
+    for (const obj of wordObjects) {
+        if (
+            !isThrown(obj) &&
+            !isRemoved(obj) &&
+            !isInRepairBox(obj) &&
+            !isInScanner(obj) &&
+            carriedObject !== obj &&
+            isPlayerNearRect(obj, range)
+        ) {
+            return obj;
+        }
+    }
+
+    return null;
+}
+
+function getNearestCore(range = 70) {
+    for (const core of cores) {
+        if (
+            !isThrown(core) &&
+            !isRemoved(core) &&
+            !isInRepairBox(core) &&
+            !isInScanner(core) &&
+            carriedObject !== core &&
+            isPlayerNearRect(core, range)
+        ) {
+            return core;
+        }
+    }
+
+    return null;
+}
+
+function getWordObjectInRepairBox() {
+    return repairBoxSlots.find(obj => obj.kind === "word");
+}
+
+function getWordObjectsInRepairBox() {
+    return repairBoxSlots.filter(obj => obj.kind === "word");
+}
+
+function getCoreObjectInRepairBox() {
+    return repairBoxSlots.find(obj => obj.kind === "core");
+}
+
+function getCoreObjectsInRepairBox() {
+    return repairBoxSlots.filter(obj => obj.kind === "core");
+}
+
+function getRepairedCoreObjectsInRepairBox() {
+    return repairBoxSlots.filter(obj => obj.kind === "repairedCore");
+}
+
+function getNearestRepairedCore(range = 70) {
+    for (const obj of repairedCores) {
+        if (
+            !isThrown(obj) &&
+            !isInRepairBox(obj) &&
+            !isInScanner(obj) &&
+            carriedObject !== obj &&
+            isPlayerNearRect(obj, range)
+        ) {
+            return obj;
+        }
+    }
+
+    return null;
+}
+
+function getPhysicalObjects(excludedObject = null) {
+    const objects = [];
+
+    for (const core of cores) {
+        if (
+            core !== excludedObject &&
+            !isRemoved(core) &&
+            !isInRepairBox(core) &&
+            !isInScanner(core) &&
+            carriedObject !== core
+        ) {
+            objects.push(core);
+        }
+    }
+
+    for (const wordObj of wordObjects) {
+        if (
+            wordObj !== excludedObject &&
+            !isRemoved(wordObj) &&
+            !isInRepairBox(wordObj) &&
+            !isInScanner(wordObj) &&
+            carriedObject !== wordObj
+        ) {
+            objects.push(wordObj);
+        }
+    }
+
+    for (const core of repairedCores) {
+        if (
+            core !== excludedObject &&
+            !isInRepairBox(core) &&
+            !isInScanner(core) &&
+            carriedObject !== core
+        ) {
+            objects.push(core);
+        }
+    }
+
+    if (
+        handScanner !== excludedObject &&
+        carriedObject !== handScanner
+    ) {
+        objects.push(handScanner);
+    }
+
+    return objects;
+}
+
+function getBlockingObjects(excludedObject = null) {
+    return [
+        repairBox,
+        terminalDesk,
+        coreStorage,
+        ...getPhysicalObjects(excludedObject)
+    ];
+}
+
+function getPhysicalObjectCollidingWithRect(rect) {
+    for (const obj of getPhysicalObjects()) {
+        const collisionRect = getCollisionRect(obj);
+
+        if (rectsOverlap(rect, collisionRect)) {
+            return obj;
+        }
+    }
+
+    return null;
+}
+
+function getStaticObjectCollidingWithRect(rect) {
+    const staticObjects = [repairBox, terminalDesk, coreStorage];
+
+    for (const obj of staticObjects) {
+        const collisionRect = getCollisionRect(obj);
+
+        if (rectsOverlap(rect, collisionRect)) {
+            return obj;
+        }
+    }
+
+    return null;
+}
+
+function canMoveObject(obj, moveX, moveY) {
+    const testRect = {
+        x: obj.x + moveX,
+        y: obj.y + moveY,
+        w: obj.w,
+        h: obj.h
+    };
+
+    // granice świata
+    if (
+        testRect.x < 0 ||
+        testRect.y < HUD_HEIGHT + 10 ||
+        testRect.x + testRect.w > world.width ||
+        testRect.y + testRect.h > world.height
+    ) {
+        return false;
+    }
+
+    // ściany laboratorium
+    if (collidesWithLab(testRect)) {
+        return false;
+    }
+
+    // inne przeszkody
+    for (const blocker of getBlockingObjects(obj)) {
+        const collisionRect = getCollisionRect(blocker);
+
+        if (rectsOverlap(testRect, collisionRect)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function movePhysicalObject(obj, moveX, moveY) {
+    obj.x += moveX;
+    obj.y += moveY;
+}
+
+function separatePlayerFromObjects() {
+    for (const obj of getPhysicalObjects()) {
+        const rect = getCollisionRect(obj);
+
+        if (!rectsOverlap(player, rect)) continue;
+
+        const playerCenterX = player.x + player.w / 2;
+        const playerCenterY = player.y + player.h / 2;
+        const objCenterX = rect.x + rect.w / 2;
+        const objCenterY = rect.y + rect.h / 2;
+
+        const overlapLeft = player.x + player.w - rect.x;
+        const overlapRight = rect.x + rect.w - player.x;
+        const overlapTop = player.y + player.h - rect.y;
+        const overlapBottom = rect.y + rect.h - player.y;
+
+        const minOverlap = Math.min(
+            overlapLeft,
+            overlapRight,
+            overlapTop,
+            overlapBottom
+        );
+
+        if (minOverlap === overlapLeft && playerCenterX < objCenterX) {
+            player.x -= overlapLeft;
+        } else if (minOverlap === overlapRight && playerCenterX > objCenterX) {
+            player.x += overlapRight;
+        } else if (minOverlap === overlapTop && playerCenterY < objCenterY) {
+            player.y -= overlapTop;
+        } else if (minOverlap === overlapBottom && playerCenterY > objCenterY) {
+            player.y += overlapBottom;
+        }
+    }
+}
+
+function putObjectIntoRepairBox(obj) {
+    if (repairBoxSlots.length >= REPAIR_BOX_MAX) {
+        message = "Box naprawczy jest pełny.";
+        return;
+    }
+
+    repairBoxSlots.push(obj);
+    carriedObject = null;
+
+    message = `${obj.label} umieszczono w boxie.`;
+}
+
+function takeObjectFromRepairBox(slotIndex) {
+    if (!isPlayerNearRect(repairBox, 110)) return;
+
+    const obj = repairBoxSlots[slotIndex];
+
+    if (!obj) {
+        message = "Ten slot boxu jest pusty.";
+        return;
+    }
+
+    repairBoxSlots.splice(slotIndex, 1);
+    carriedObject = obj;
+
+    obj.x = player.x + player.w / 2 - obj.w * 0.5 / 2;
+    obj.y = player.y - obj.h * 0.5 - 10;
+
+    message = `Wyjęto z boxu: ${obj.label}.`;
+}
+
+function scannerSlotAction() {
+    if (carriedObject && carriedObject === handScanner) {
+        message = "Najpierw odłóż skaner, aby użyć jego okienka.";
+        return;
+    }
+
+    if (carriedObject && carriedObject.kind !== "scanner") {
+        if (scannerSlot) {
+            message = "Skaner jest zajęty. Najpierw wyjmij obiekt.";
+            return;
+        }
+
+        scannerSlot = carriedObject;
+        carriedObject = null;
+        message = `Włożono do skanera: ${scannerSlot.label}.`;
+        return;
+    }
+
+    if (!carriedObject && scannerSlot) {
+        carriedObject = scannerSlot;
+        scannerSlot = null;
+
+        carriedObject.x = player.x + player.w / 2 - carriedObject.w * 0.5 / 2;
+        carriedObject.y = player.y - carriedObject.h * 0.5 - 10;
+
+        message = `Wyjęto ze skanera: ${carriedObject.label}.`;
+        return;
+    }
+
+    message = "Skaner — R: włóż / wyjmij obiekt, G: skanuj.";
+}
+
+function scanScannerSlot() {
+    if (!scannerSlot) {
+        scanPopupText = "Skaner pusty.";
+        scanPopupTimer = 60;
+        return;
+    }
+
+    if (scannerSlot.kind === "word") {
+        scanPopupText = `Moduł zawiera: ${scannerSlot.hiddenWord}`;
+        scanPopupTimer = 60;
+        return;
+    }
+
+    if (scannerSlot.kind === "core") {
+        scanPopupText = `Kod rdzenia: ${scannerSlot.code}`;
+        scanPopupTimer = 60;
+        return;
+    }
+
+    if (scannerSlot.kind === "repairedCore") {
+        scanPopupText = `Rdzeń naprawiony: ${scannerSlot.correctWord}`;
+        scanPopupTimer = 60;
+        return;
+    }
+
+    scanPopupText = "Nieznany obiekt.";
+    scanPopupTimer = 60;
+}
+
+function diagnosticAction() {
+    if (!isPlayerNearRect(terminalDesk, 110)) {
+        return;
+    }
+
+    if (repairBoxSlots.length === 0) {
+        message = "Terminal — box jest pusty. Diagnostyka niemożliwa.";
+        return;
+    }
+
+    diagnosticOpen = true;
+    message = "Diagnostyka boxu uruchomiona.";
+}
+
+function linkAction() {
+    if (!isPlayerNearRect(terminalDesk, 110)) {
+        return;
+    }
+
+    const coresInBox = getCoreObjectsInRepairBox();
+    const wordsInBox = getWordObjectsInRepairBox();
+
+    if (coresInBox.length === 0 || wordsInBox.length === 0) {
+        linkErrorFlash = 45;
+        showTemporaryMessage("Link nieudany — potrzebny jest rdzeń i obiekt ze słowem.", 120);
+        return;
+    }
+
+    let coreToRepair = null;
+    let matchingWord = null;
+
+    for (const core of coresInBox) {
+        matchingWord = wordsInBox.find(word => word.hiddenWord === core.correctWord);
+
+        if (matchingWord) {
+            coreToRepair = core;
+            break;
+        }
+    }
+
+    if (!coreToRepair || !matchingWord) {
+        registerWrongLink();
+        return;
+    }
+
+    const newRepairedCore = {
+        id: coreToRepair.id + "_repaired_" + Date.now(),
+        label: "Naprawiony " + coreToRepair.label,
+        x: 0,
+        y: 0,
+        w: coreToRepair.w,
+        h: coreToRepair.h,
+        kind: "repairedCore",
+        code: coreToRepair.code,
+        correctWord: coreToRepair.correctWord
+    };
+
+    repairedCores.push(newRepairedCore);
+
+    removedObjects.push(coreToRepair);
+    removedObjects.push(matchingWord);
+
+    repairBoxSlots = repairBoxSlots.filter(
+        obj => obj !== coreToRepair && obj !== matchingWord
+    );
+
+    repairBoxSlots.push(newRepairedCore);
+
+    diagnosticOpen = false;
+
+    showTemporaryMessage("Link poprawny — rdzeń został naprawiony.", 140);
+}
+
+function registerWrongLink() {
+    wrongLinks++;
+    linkErrorFlash = 45;
+
+    if (wrongLinks >= WRONG_LINK_LIMIT) {
+        gameOver = true;
+        diagnosticOpen = false;
+        instructionOpen = false;
+        showTemporaryMessage("GAME OVER — 3 błędne połączenia.", 9999);
+        return;
+    }
+
+    const left = WRONG_LINK_LIMIT - wrongLinks;
+
+    if (left === 1) {
+        showTemporaryMessage("Błędny link! Ostatnia szansa — kolejny błąd kończy grę.", 180);
+    } else {
+        showTemporaryMessage(`Błędny link! Pozostałe próby: ${left}.`, 150);
     }
 }
 
 function dropCarriedObject() {
-    carriedObject.x = player.x + player.w / 2 - carriedObject.w / 2;
-    carriedObject.y = player.y + player.h + 6;
+    const obj = carriedObject;
 
-    message = "Odłożono uszkodzony rdzeń.";
+    const startX = player.x + player.w / 2 - obj.w / 2;
+    const startY = player.y + player.h + 6;
+
+    const freePos = findFreeDropPosition(obj, startX, startY);
+
+    obj.x = freePos.x;
+    obj.y = freePos.y;
+
+    message = `Odłożono: ${obj.label}.`;
     carriedObject = null;
 }
 
-function putCoreIntoRepairBox() {
-    coreInRepairBox = true;
+function throwCarriedObject() {
+    if (!carriedObject) return;
+
+    const obj = carriedObject;
+
+    let dirX = player.dirX;
+    let dirY = player.dirY;
+
+    if (Math.abs(dirX) < 0.1 && Math.abs(dirY) < 0.1) {
+        dirX = 0;
+        dirY = 1;
+    }
+
+    const len = Math.hypot(dirX, dirY);
+    dirX /= len;
+    dirY /= len;
+
+    const throwSpeed = 9;
+    const throwDistance = obj.w * 7;
+
+    thrownObjects.push({
+        obj: obj,
+        vx: dirX * throwSpeed,
+        vy: dirY * throwSpeed,
+        remaining: throwDistance
+    });
+
     carriedObject = null;
 
-    message = "Rdzeń umieszczony w boxie naprawczym.";
+    showTemporaryMessage(`Rzut: ${obj.label}.`, 60);
 }
 
-function takeCoreFromRepairBox() {
-    coreInRepairBox = false;
-    carriedObject = damagedCore;
+function updateThrownObjects() {
+    for (let i = thrownObjects.length - 1; i >= 0; i--) {
+        const thrown = thrownObjects[i];
+        const obj = thrown.obj;
 
-    damagedCore.x = player.x + player.w / 2 - damagedCore.w * 0.5 / 2;
-    damagedCore.y = player.y - damagedCore.h * 0.5 - 10;
+        if (thrown.remaining <= 0) {
+            thrownObjects.splice(i, 1);
+            continue;
+        }
 
-    message = "Wyjęto rdzeń z boxu naprawczego.";
+        if (canMoveObject(obj, thrown.vx, thrown.vy)) {
+            movePhysicalObject(obj, thrown.vx, thrown.vy);
+            thrown.remaining -= Math.hypot(thrown.vx, thrown.vy);
+        } else {
+            thrownObjects.splice(i, 1);
+        }
+    }
+}
+
+function updatePrankRobot(robot) {
+    if (robot.escapeTimer > 0) {
+        const moved = movePrankRobot(
+            robot,
+            robot.escapeDirX * robot.speed,
+            robot.escapeDirY * robot.speed
+        );
+
+        robot.escapeTimer--;
+
+        if (!moved) {
+            robot.escapeTimer = 0;
+        }
+
+        return;
+    }
+    if (robot.skipTimer > 0) {
+        robot.skipTimer--;
+
+        if (robot.skipTimer <= 0) {
+            robot.skippedTarget = null;
+        }
+    }
+
+    if (robot.waitTimer > 0) {
+        robot.waitTimer--;
+        return;
+    }
+
+    if (
+        !robot.target ||
+        isInRepairBox(robot.target) ||
+        isRemoved(robot.target) ||
+        isThrown(robot.target) ||
+        isRectInsideLab(getCollisionRect(robot.target))
+    ) {
+        choosePrankRobotTarget(robot);
+        return;
+    }
+
+    const target = robot.target;
+    const targetCenter = getObjectCenter(target);
+
+    // robot ustawia się po przeciwnej stronie do kierunku pchania
+    const desiredX = targetCenter.x - robot.pushDirX * 58 - robot.w / 2;
+    const desiredY = targetCenter.y - robot.pushDirY * 58 - robot.h / 2;
+
+    const robotCenter = getObjectCenter(robot);
+    const dist = Math.hypot(
+        desiredX + robot.w / 2 - robotCenter.x,
+        desiredY + robot.h / 2 - robotCenter.y
+    );
+
+    if (dist > 12) {
+        const moveDir = normalizeVector(
+            desiredX + robot.w / 2 - robotCenter.x,
+            desiredY + robot.h / 2 - robotCenter.y
+        );
+
+        const moved = movePrankRobot(
+            robot,
+            moveDir.x * robot.speed,
+            moveDir.y * robot.speed
+        );
+
+        if (!moved) {
+            startRobotEscape(robot);
+        }
+
+        return;
+    }
+
+    // pchanie w stronę granicy mapy
+    const moveX = robot.pushDirX * robot.speed;
+    const moveY = robot.pushDirY * robot.speed;
+
+    const targetTestRect = {
+        x: target.x + moveX,
+        y: target.y + moveY,
+        w: target.w,
+        h: target.h
+    };
+
+    if (
+        canMoveObject(target, moveX, moveY) &&
+        !isRectInsideLab(targetTestRect)
+    ) {
+        movePhysicalObject(target, moveX, moveY);
+        movePrankRobot(robot, moveX, moveY);
+
+        robot.pushTimer++;
+
+        if (robot.pushTimer > 200) {
+            robot.target = null;
+            robot.waitTimer = 15;
+        }
+    } else {
+        startRobotEscape(robot);
+    }
+}
+
+function movePrankRobot(robot, moveX, moveY) {
+    const testRect = {
+        x: robot.x + moveX,
+        y: robot.y + moveY,
+        w: robot.w,
+        h: robot.h
+    };
+
+    if (
+        testRect.x < 0 ||
+        testRect.y < HUD_HEIGHT + 10 ||
+        testRect.x + testRect.w > world.width ||
+        testRect.y + testRect.h > world.height ||
+        collidesWithLab(testRect) ||
+        isRectInsideLab(testRect)
+    ) {
+        return false;
+    }
+
+    robot.x += moveX;
+    robot.y += moveY;
+
+    return true;
+}
+
+function startRobotEscape(robot) {
+    const directions = [
+        { x: 1, y: 0 },
+        { x: -1, y: 0 },
+        { x: 0, y: 1 },
+        { x: 0, y: -1 },
+        { x: 1, y: 1 },
+        { x: -1, y: 1 },
+        { x: 1, y: -1 },
+        { x: -1, y: -1 }
+    ];
+
+    directions.sort(() => Math.random() - 0.5);
+
+    for (const dir of directions) {
+        const normalized = normalizeVector(dir.x, dir.y);
+
+        if (movePrankRobot(robot, normalized.x * robot.speed, normalized.y * robot.speed)) {
+            robot.escapeDirX = normalized.x;
+            robot.escapeDirY = normalized.y;
+            robot.escapeTimer = 45;
+            robot.target = null;
+            robot.waitTimer = 0;
+            return;
+        }
+    }
+
+    robot.target = null;
+    robot.waitTimer = 30;
 }
 
 function isPlayerInsideLab() {
@@ -257,6 +1274,18 @@ function isPlayerInsideLab() {
         px < lab.x + lab.w - lab.wall &&
         py > lab.y + lab.wall &&
         py < lab.y + lab.h - lab.wall
+    );
+}
+
+function isRectInsideLab(rect) {
+    const cx = rect.x + rect.w / 2;
+    const cy = rect.y + rect.h / 2;
+
+    return (
+        cx > lab.x + lab.wall &&
+        cx < lab.x + lab.w - lab.wall &&
+        cy > lab.y + lab.wall &&
+        cy < lab.y + lab.h - lab.wall
     );
 }
 
@@ -286,18 +1315,41 @@ function isPlayerNearRect(rect, range) {
 }
 
 function movePlayer(moveX, moveY) {
+    // RUCH W OSI X
     player.x += moveX;
 
-    if (collidesWithLab(player) || collidesWithLabObject(player)) {
+    if (collidesWithLab(player) || getStaticObjectCollidingWithRect(player)) {
         player.x -= moveX;
+    } else {
+        const pushedObject = getPhysicalObjectCollidingWithRect(player);
+
+        if (pushedObject) {
+            if (canMoveObject(pushedObject, moveX, 0)) {
+                movePhysicalObject(pushedObject, moveX, 0);
+            } else {
+                player.x -= moveX;
+            }
+        }
     }
 
+    // RUCH W OSI Y
     player.y += moveY;
 
-    if (collidesWithLab(player) || collidesWithLabObject(player)) {
+    if (collidesWithLab(player) || getStaticObjectCollidingWithRect(player)) {
         player.y -= moveY;
+    } else {
+        const pushedObject = getPhysicalObjectCollidingWithRect(player);
+
+        if (pushedObject) {
+            if (canMoveObject(pushedObject, 0, moveY)) {
+                movePhysicalObject(pushedObject, 0, moveY);
+            } else {
+                player.y -= moveY;
+            }
+        }
     }
 
+    separatePlayerFromObjects();
     player.x = clamp(player.x, 0, world.width - player.w);
     player.y = clamp(player.y, HUD_HEIGHT + 10, world.height - player.h);
 }
@@ -314,20 +1366,35 @@ function collidesWithLab(rect) {
     return false;
 }
 
-function collidesWithLabObject(rect) {
-    const objects = [repairBox, terminalDesk];
-
-    if (!coreInRepairBox && carriedObject !== damagedCore) {
-        objects.push(damagedCore);
+function getCollisionRect(obj) {
+    if (obj === repairBox) {
+        return {
+            x: obj.x + 8,
+            y: obj.y + 45,
+            w: obj.w - 16,
+            h: obj.h - 45
+        };
     }
 
-    for (const obj of objects) {
-        if (rectsOverlap(rect, obj)) {
-            return true;
-        }
+    if (obj === terminalDesk) {
+        return {
+            x: obj.x + 8,
+            y: obj.y + 38,
+            w: obj.w - 16,
+            h: obj.h - 38
+        };
     }
 
-    return false;
+    if (obj === coreStorage) {
+        return {
+            x: obj.x + 8,
+            y: obj.y + 20,
+            w: obj.w - 16,
+            h: obj.h - 20
+        };
+    }
+
+    return obj;
 }
 
 function getLabWalls() {
@@ -385,6 +1452,97 @@ function rectsOverlap(a, b) {
     );
 }
 
+function rectsOverlapWithPadding(a, b, padding = 10) {
+    return (
+        a.x - padding < b.x + b.w + padding &&
+        a.x + a.w + padding > b.x - padding &&
+        a.y - padding < b.y + b.h + padding &&
+        a.y + a.h + padding > b.y - padding
+    );
+}
+
+function getDropBlockingObjects(excludedObject) {
+    const objects = [repairBox, terminalDesk, coreStorage];
+
+    for (const core of cores) {
+        if (
+            core !== excludedObject &&
+            !isRemoved(core) &&
+            !isInRepairBox(core)
+        ) {
+            objects.push(core);
+        }
+    }
+
+    for (const wordObj of wordObjects) {
+        if (
+            wordObj !== excludedObject &&
+            !isRemoved(wordObj) &&
+            !isInRepairBox(wordObj)
+        ) {
+            objects.push(wordObj);
+        }
+    }
+
+    for (const core of repairedCores) {
+        if (
+            core !== excludedObject &&
+            !isInRepairBox(core)
+        ) {
+            objects.push(core);
+        }
+    }
+
+    return objects;
+}
+
+function findFreeDropPosition(obj, startX, startY) {
+    const positions = [
+        { x: startX, y: startY },
+        { x: startX + 45, y: startY },
+        { x: startX - 45, y: startY },
+        { x: startX, y: startY + 45 },
+        { x: startX, y: startY - 45 },
+        { x: startX + 45, y: startY + 45 },
+        { x: startX - 45, y: startY + 45 },
+        { x: startX + 45, y: startY - 45 },
+        { x: startX - 45, y: startY - 45 },
+        { x: startX + 90, y: startY },
+        { x: startX - 90, y: startY },
+        { x: startX, y: startY + 90 }
+    ];
+
+    for (const pos of positions) {
+        const testRect = {
+            x: pos.x,
+            y: pos.y,
+            w: obj.w,
+            h: obj.h
+        };
+
+        if (collidesWithLab(testRect)) {
+            continue;
+        }
+
+        let blocked = false;
+
+        for (const other of getDropBlockingObjects(obj)) {
+            const collisionRect = getCollisionRect(other);
+
+            if (rectsOverlapWithPadding(testRect, collisionRect, 12)) {
+                blocked = true;
+                break;
+            }
+        }
+
+        if (!blocked) {
+            return pos;
+        }
+    }
+
+    return { x: startX, y: startY };
+}
+
 function draw() {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -393,21 +1551,489 @@ function draw() {
 
     drawMap();
 
-    if (!carriedObject && !coreInRepairBox) {
-        drawDamagedCore(1);
+    if (carriedObject !== handScanner) {
+        drawHandScanner();
     }
 
+    for (const core of cores) {
+        if (
+            !isRemoved(core) &&
+            carriedObject !== core &&
+            !isInRepairBox(core) &&
+            !isInScanner(core)
+        ) {
+            drawDamagedCore(core, 1);
+        }
+    }
+
+    for (const wordObj of wordObjects) {
+        if (
+            !isRemoved(wordObj) &&
+            carriedObject !== wordObj &&
+            !isInRepairBox(wordObj) &&
+            !isInScanner(wordObj)
+        ) {
+            drawWordModule(wordObj, 1);
+        }
+    }
+
+    for (const core of repairedCores) {
+        if (
+            carriedObject !== core &&
+            !isInRepairBox(core) &&
+            !isInScanner(core)
+        ) {
+            drawRepairedCore(core, 1);
+        }
+    }
+
+    for (const robot of prankRobots) {
+        drawPrankRobot(robot);
+    }
     drawPlayer();
 
-    if (carriedObject) {
-        drawDamagedCore(0.5);
+    if (carriedObject && carriedObject.kind === "core") {
+        drawDamagedCore(carriedObject, 0.5);
     }
 
-    if (coreInRepairBox) {
-        drawCoreInRepairBox();
+    if (carriedObject && carriedObject.kind === "word") {
+        drawWordModule(carriedObject, 0.5);
     }
+
+    if (carriedObject && carriedObject.kind === "repairedCore") {
+        drawRepairedCore(carriedObject, 0.5);
+    }
+
+    if (carriedObject === handScanner) {
+        drawHandScanner(0.65);
+    }
+
+    drawRepairBoxSlots();
 
     drawUI();
+
+    if (diagnosticOpen) {
+        drawDiagnosticWindow();
+    }
+
+    if (instructionOpen) {
+        drawInstructionWindow();
+    }
+
+    if (gameOver) {
+        drawGameOverWindow();
+    }
+
+    if (scanPopupTimer > 0) {
+        drawScanPopup();
+    }
+}
+
+function drawGameOverWindow() {
+    const w = 620;
+    const h = 250;
+    const x = canvas.width / 2 - w / 2;
+    const y = canvas.height / 2 - h / 2;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.68)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#111827";
+    roundRect(x, y, w, h, 18);
+    ctx.fill();
+
+    ctx.strokeStyle = "#ff8080";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    ctx.fillStyle = "#ff8080";
+    ctx.font = "42px Arial";
+    ctx.fillText("GAME OVER", x + 185, y + 78);
+
+    ctx.fillStyle = "#c8fff4";
+    ctx.font = "19px Arial";
+    ctx.fillText("System wykrył 3 błędne połączenia rdzeni z modułami.", x + 55, y + 130);
+
+    ctx.fillStyle = "#fef3c7";
+    ctx.font = "17px Arial";
+    ctx.fillText("Odśwież stronę, aby rozpocząć ponownie.", x + 165, y + 178);
+}
+
+function drawDiagnosticWindow() {
+    const w = 680;
+    const h = 520;
+    const x = canvas.width / 2 - w / 2;
+    const y = canvas.height / 2 - h / 2;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#08111f";
+    roundRect(x, y, w, h, 18);
+    ctx.fill();
+
+    ctx.strokeStyle = "#79ffe1";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = "#79ffe1";
+    ctx.font = "24px Arial";
+    ctx.fillText("DIAGNOSTYKA BOXU", x + 30, y + 45);
+
+    let lineY = y + 82;
+
+    const wordsInBox = getWordObjectsInRepairBox();
+    const coresInBox = getCoreObjectsInRepairBox();
+    const repairedInBox = getRepairedCoreObjectsInRepairBox();
+
+    for (const core of repairedInBox) {
+        ctx.fillStyle = "#c8fff4";
+        ctx.font = "16px Arial";
+        ctx.fillText(`${core.label}: sprawny`, x + 30, lineY);
+        lineY += 24;
+
+        ctx.fillStyle = "#111827";
+        roundRect(x + 30, lineY, w - 60, 52, 10);
+        ctx.fill();
+
+        ctx.fillStyle = "#b6ff6b";
+        ctx.font = "20px Consolas, monospace";
+        ctx.fillText(core.code.replace("___", core.correctWord), x + 55, lineY + 34);
+
+        lineY += 75;
+    }
+
+    for (const core of coresInBox) {
+        ctx.fillStyle = "#c8fff4";
+        ctx.font = "16px Arial";
+        ctx.fillText(`${core.label}: uszkodzony`, x + 30, lineY);
+        lineY += 24;
+
+        ctx.fillStyle = "#111827";
+        roundRect(x + 30, lineY, w - 60, 52, 10);
+        ctx.fill();
+
+        ctx.fillStyle = "#fef3c7";
+        ctx.font = "20px Consolas, monospace";
+        ctx.fillText(core.code, x + 55, lineY + 34);
+
+        lineY += 75;
+    }
+
+    for (const wordObj of wordsInBox) {
+        ctx.fillStyle = "#c8fff4";
+        ctx.font = "15px Arial";
+        ctx.fillText(`${wordObj.label}: ukryte słowo`, x + 30, lineY);
+        lineY += 22;
+
+        ctx.fillStyle = "#111827";
+        roundRect(x + 30, lineY, w - 60, 46, 10);
+        ctx.fill();
+
+        ctx.fillStyle = "#b6ff6b";
+        ctx.font = "22px Consolas, monospace";
+        ctx.fillText(wordObj.hiddenWord, x + 55, lineY + 31);
+
+        lineY += 64;
+    }
+
+    ctx.fillStyle = "#79ffe1";
+    ctx.font = "15px Arial";
+    ctx.fillText("ESC — zamknij", x + 30, y + h - 22);
+}
+
+function drawWordModule(obj, scale = 1) {
+    const x = obj.x;
+    const y = obj.y;
+    const w = obj.w * scale;
+    const h = obj.h * scale;
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+    ctx.beginPath();
+    ctx.ellipse(x + w / 2, y + h + 5, 22 * scale, 7 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#064e3b";
+    roundRect(x, y, w, h, 7 * scale);
+    ctx.fill();
+
+    ctx.strokeStyle = "#b6ff6b";
+    ctx.lineWidth = 3 * scale;
+    ctx.stroke();
+
+    ctx.fillStyle = "#b6ff6b";
+    ctx.font = `${16 * scale}px Consolas`;
+    ctx.fillText("?", x + 12 * scale, y + 23 * scale);
+}
+
+function drawRepairBoxSlots() {
+    const count = repairBoxSlots.length;
+    if (count === 0) return;
+
+    const slotSize = 24;
+    const gap = 10;
+
+    const totalWidth = count * slotSize + (count - 1) * gap;
+
+    let startX = repairBox.x + repairBox.w / 2 - totalWidth / 2;
+    const y = repairBox.y + 42;
+
+    for (let i = 0; i < repairBoxSlots.length; i++) {
+        const obj = repairBoxSlots[i];
+        const x = startX + i * (slotSize + gap);
+
+        if (obj.kind === "core") {
+            drawMiniCore(x, y);
+        }
+
+        if (obj.kind === "word") {
+            drawMiniWordModule(x, y);
+        }
+
+        if (obj.kind === "repairedCore") {
+            drawMiniRepairedCore(x, y);
+        }
+
+        ctx.fillStyle = "#c8fff4";
+        ctx.font = "10px Arial";
+        ctx.fillText(String(i + 1), x + 8, y + 36);
+    }
+}
+
+function drawMiniCore(x, y) {
+    ctx.fillStyle = "#2e1065";
+    roundRect(x, y, 24, 24, 6);
+    ctx.fill();
+
+    ctx.strokeStyle = "#ff4fd8";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.strokeStyle = "#fef3c7";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x + 12, y + 4);
+    ctx.lineTo(x + 8, y + 12);
+    ctx.lineTo(x + 15, y + 15);
+    ctx.lineTo(x + 11, y + 21);
+    ctx.stroke();
+
+    ctx.fillStyle = "#38bdf8";
+    ctx.beginPath();
+    ctx.arc(x + 18, y + 7, 3, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function drawMiniRepairedCore(x, y) {
+    ctx.fillStyle = "#2e1065";
+    roundRect(x, y, 24, 24, 6);
+    ctx.fill();
+
+    ctx.strokeStyle = "#22c55e";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.strokeStyle = "#ff4fd8";
+    ctx.lineWidth = 1.5;
+    roundRect(x + 4, y + 4, 16, 16, 4);
+    ctx.stroke();
+
+    ctx.fillStyle = "#38bdf8";
+    ctx.beginPath();
+    ctx.arc(x + 18, y + 7, 3, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function drawMiniWordModule(x, y) {
+    ctx.fillStyle = "#064e3b";
+    roundRect(x, y, 24, 24, 6);
+    ctx.fill();
+
+    ctx.strokeStyle = "#b6ff6b";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#b6ff6b";
+    ctx.font = "16px Consolas";
+    ctx.fillText("?", x + 8, y + 18);
+}
+
+function drawHandScanner(scale = 1) {
+    const x = handScanner.x;
+    const y = handScanner.y;
+
+    const w = handScanner.w * scale;
+    const h = handScanner.h * scale;
+
+    // mały cień
+    ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
+    ctx.beginPath();
+    ctx.ellipse(
+        x + w / 2,
+        y + h + 4 * scale,
+        w * 0.26,
+        4 * scale,
+        0,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
+
+    // dolna podstawa urządzenia
+    ctx.fillStyle = "#0f172a";
+    roundRect(x, y + 18 * scale, w, h - 12 * scale, 12 * scale);
+    ctx.fill();
+
+    // górne przezroczyste szkiełko
+    ctx.fillStyle = "rgba(125, 255, 230, 0.13)";
+    roundRect(
+        x + 8 * scale,
+        y,
+        w - 16 * scale,
+        h * 0.62,
+        12 * scale
+    );
+    ctx.fill();
+
+    ctx.strokeStyle = scannerSlot ? "#b6ff6b" : "#79ffe1";
+    ctx.lineWidth = 3 * scale;
+    ctx.stroke();
+
+    // delikatny połysk szkła
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.28)";
+    ctx.lineWidth = 1.5 * scale;
+    ctx.beginPath();
+    ctx.moveTo(x + 18 * scale, y + 9 * scale);
+    ctx.lineTo(x + w - 20 * scale, y + 9 * scale);
+    ctx.stroke();
+
+    // panel statusu na podstawie
+    ctx.fillStyle = scannerSlot ? "#14532d" : "#1e293b";
+    roundRect(
+        x + 16 * scale,
+        y + h - 18 * scale,
+        w - 32 * scale,
+        10 * scale,
+        5 * scale
+    );
+    ctx.fill();
+
+    // zawartość skanera
+    if (scannerSlot) {
+        drawObjectInsideScanner(x, y, w, h, scale);
+    } else {
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = `${11 * scale}px Consolas`;
+        ctx.fillText("PUSTY", x + 20 * scale, y + 31 * scale);
+    }
+}
+
+function drawObjectInsideScanner(scannerX, scannerY, scannerW, scannerH, scale = 1) {
+    const size = 20 * scale;
+
+    // centrum szkiełka, nie całego skanera
+    const glassCenterX = scannerX + scannerW / 2;
+    const glassCenterY = scannerY + scannerH * 0.31;
+
+    const x = glassCenterX - size / 2;
+    const y = glassCenterY - size / 2;
+
+    if (scannerSlot.kind === "core") {
+        ctx.fillStyle = "#2e1065";
+        roundRect(x, y, size, size, 5 * scale);
+        ctx.fill();
+
+        ctx.strokeStyle = "#ff4fd8";
+        ctx.lineWidth = 2 * scale;
+        ctx.stroke();
+
+        ctx.strokeStyle = "#fef3c7";
+        ctx.lineWidth = 1.4 * scale;
+        ctx.beginPath();
+        ctx.moveTo(x + size * 0.52, y + size * 0.12);
+        ctx.lineTo(x + size * 0.35, y + size * 0.48);
+        ctx.lineTo(x + size * 0.62, y + size * 0.60);
+        ctx.lineTo(x + size * 0.44, y + size * 0.88);
+        ctx.stroke();
+
+        ctx.fillStyle = "#38bdf8";
+        ctx.beginPath();
+        ctx.arc(x + size * 0.72, y + size * 0.25, 2.2 * scale, 0, Math.PI * 2);
+        ctx.fill();
+
+        return;
+    }
+
+    if (scannerSlot.kind === "word") {
+        ctx.fillStyle = "#064e3b";
+        roundRect(x, y, size, size, 5 * scale);
+        ctx.fill();
+
+        ctx.strokeStyle = "#b6ff6b";
+        ctx.lineWidth = 2 * scale;
+        ctx.stroke();
+
+        ctx.fillStyle = "#b6ff6b";
+        ctx.font = `${14 * scale}px Consolas`;
+        ctx.fillText("?", x + 6.5 * scale, y + 15.5 * scale);
+
+        return;
+    }
+
+    if (scannerSlot.kind === "repairedCore") {
+        ctx.fillStyle = "#2e1065";
+        roundRect(x, y, size, size, 5 * scale);
+        ctx.fill();
+
+        ctx.strokeStyle = "#22c55e";
+        ctx.lineWidth = 3 * scale;
+        ctx.stroke();
+
+        ctx.strokeStyle = "#ff4fd8";
+        ctx.lineWidth = 1.3 * scale;
+        roundRect(
+            x + 4 * scale,
+            y + 4 * scale,
+            size - 8 * scale,
+            size - 8 * scale,
+            4 * scale
+        );
+        ctx.stroke();
+
+        ctx.fillStyle = "#38bdf8";
+        ctx.beginPath();
+        ctx.arc(x + size * 0.72, y + size * 0.25, 2.2 * scale, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function drawScanPopup() {
+    const w = 420;
+    const h = 90;
+    const x = canvas.width / 2 - w / 2;
+    const y = 82;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    ctx.fillStyle = "rgba(8, 17, 31, 0.94)";
+    roundRect(x, y, w, h, 14);
+    ctx.fill();
+
+    ctx.strokeStyle = "#38bdf8";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = "#79ffe1";
+    ctx.font = "18px Arial";
+    ctx.fillText("SKANER", x + 24, y + 32);
+
+    ctx.fillStyle = "#c8fff4";
+    ctx.font = "20px Consolas, monospace";
+    ctx.fillText(scanPopupText, x + 24, y + 65);
 }
 
 function drawMap() {
@@ -530,6 +2156,7 @@ function drawLab() {
 function drawLabEquipment() {
     drawRepairBox();
     drawTerminalDesk();
+    drawCoreStorage();
 }
 
 function drawRepairBox() {
@@ -574,6 +2201,19 @@ function drawRepairBox() {
     ctx.fillStyle = "#c8fff4";
     ctx.font = "16px Arial";
     ctx.fillText("REPAIR BOX", x + 48, y + h - 20);
+
+    if (linkErrorFlash > 0) {
+        const alpha = linkErrorFlash / 45;
+
+        ctx.strokeStyle = `rgba(255, 80, 80, ${alpha})`;
+        ctx.lineWidth = 6;
+        roundRect(x + 35, y + 25, w - 70, 55, 14);
+        ctx.stroke();
+
+        ctx.fillStyle = `rgba(255, 40, 40, ${alpha * 0.18})`;
+        roundRect(x + 35, y + 25, w - 70, 55, 14);
+        ctx.fill();
+    }
 }
 
 function drawTerminalDesk() {
@@ -620,11 +2260,108 @@ function drawTerminalDesk() {
     ctx.fillText("TERMINAL", x + 70, y + h - 18);
 }
 
-function drawDamagedCore(scale = 1) {
-    const x = damagedCore.x;
-    const y = damagedCore.y;
-    const w = damagedCore.w * scale;
-    const h = damagedCore.h * scale;
+function drawCoreStorage() {
+    const x = coreStorage.x;
+    const y = coreStorage.y;
+    const w = coreStorage.w;
+    const h = coreStorage.h;
+
+    // cień
+    ctx.fillStyle = "rgba(0, 0, 0, 0.32)";
+    ctx.beginPath();
+    ctx.ellipse(x + w / 2, y + h + 10, w * 0.42, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // korpus
+    ctx.fillStyle = "#1e293b";
+    roundRect(x, y, w, h, 18);
+    ctx.fill();
+
+    // wnętrze magazynu — większa przestrzeń ładunkowa
+    ctx.fillStyle = "#0f172a";
+    roundRect(x + 18, y + 28, w - 36, h - 88, 14);
+    ctx.fill();
+
+    // obrys wnętrza
+    ctx.strokeStyle = "#22c55e";
+    ctx.lineWidth = 3;
+    roundRect(x + 18, y + 28, w - 36, h - 88, 14);
+    ctx.stroke();
+
+    // podpis
+    ctx.fillStyle = "#c8fff4";
+    ctx.font = "15px Arial";
+    ctx.fillText("MAGAZYN", x + 48, y + h - 24);
+
+    // licznik mały na dole
+    ctx.fillStyle = "#22c55e";
+    ctx.font = "14px Arial";
+    ctx.fillText(`${storedRepairedCores.length}/${cores.length}`, x + 68, y + h - 8);
+
+    drawStoredCoresInsideStorage(x, y, w, h);
+}
+
+function drawStoredCoresInsideStorage(storageX, storageY, storageW, storageH) {
+    const scale = 0.5;
+    const miniW = CORE_SIZE * scale;
+    const miniH = CORE_SIZE * scale;
+
+    const columns = 3;
+    const gapX = 18;
+    const gapY = 18;
+
+    const innerX = storageX + 18;
+    const innerY = storageY + 28;
+    const innerW = storageW - 36;
+    const innerH = storageH - 88;
+
+    const totalRowWidth = columns * miniW + (columns - 1) * gapX;
+    const startX = innerX + innerW / 2 - totalRowWidth / 2;
+
+    const bottomY = innerY + innerH - miniH - 16;
+
+    for (let i = 0; i < storedRepairedCores.length; i++) {
+        const col = i % columns;
+        const rowFromBottom = Math.floor(i / columns);
+
+        const x = startX + col * (miniW + gapX);
+        const y = bottomY - rowFromBottom * (miniH + gapY);
+
+        drawStoredMiniCore(x, y, scale);
+    }
+}
+
+function drawStoredMiniCore(x, y, scale = 0.5) {
+    const w = CORE_SIZE * scale;
+    const h = CORE_SIZE * scale;
+
+    ctx.fillStyle = "#2e1065";
+    roundRect(x, y, w, h, 6);
+    ctx.fill();
+
+    // zielona obwódka = naprawiony
+    ctx.strokeStyle = "#22c55e";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // wewnętrzna fioletowa obwódka
+    ctx.strokeStyle = "#ff4fd8";
+    ctx.lineWidth = 1.5;
+    roundRect(x + 3, y + 3, w - 6, h - 6, 4);
+    ctx.stroke();
+
+    // punkt energii
+    ctx.fillStyle = "#38bdf8";
+    ctx.beginPath();
+    ctx.arc(x + w * 0.72, y + h * 0.28, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function drawDamagedCore(core, scale = 1) {
+    const x = core.x;
+    const y = core.y;
+    const w = core.w * scale;
+    const h = core.h * scale;
 
     // cień
     ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
@@ -658,30 +2395,33 @@ function drawDamagedCore(scale = 1) {
     ctx.fill();
 }
 
-function drawCoreInRepairBox() {
-    const x = repairBox.x + repairBox.w / 2 - 12;
-    const y = repairBox.y + 42;
+function drawRepairedCore(core, scale = 1) {
+    const x = core.x;
+    const y = core.y;
+    const w = core.w * scale;
+    const h = core.h * scale;
 
-    ctx.fillStyle = "#2e1065";
-    roundRect(x, y, 24, 24, 6);
+    ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+    ctx.beginPath();
+    ctx.ellipse(x + w / 2, y + h + 5, 24 * scale, 8 * scale, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.strokeStyle = "#ff4fd8";
-    ctx.lineWidth = 2;
+    ctx.fillStyle = "#2e1065";
+    roundRect(x, y, w, h, 8 * scale);
+    ctx.fill();
+
+    ctx.strokeStyle = "#22c55e";
+    ctx.lineWidth = 5 * scale;
     ctx.stroke();
 
-    ctx.strokeStyle = "#fef3c7";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(x + 12, y + 4);
-    ctx.lineTo(x + 8, y + 12);
-    ctx.lineTo(x + 15, y + 15);
-    ctx.lineTo(x + 11, y + 21);
+    ctx.strokeStyle = "#ff4fd8";
+    ctx.lineWidth = 2 * scale;
+    roundRect(x + 5 * scale, y + 5 * scale, w - 10 * scale, h - 10 * scale, 6 * scale);
     ctx.stroke();
 
     ctx.fillStyle = "#38bdf8";
     ctx.beginPath();
-    ctx.arc(x + 18, y + 7, 3, 0, Math.PI * 2);
+    ctx.arc(x + 27 * scale, y + 10 * scale, 4 * scale, 0, Math.PI * 2);
     ctx.fill();
 }
 
@@ -734,6 +2474,53 @@ function drawPlayer() {
 
     drawPlayerShadow(x, y);
     drawPlayerBody(x, y);
+}
+
+function drawPrankRobot(robot) {
+    const x = robot.x;
+    const y = robot.y;
+    const w = robot.w;
+    const h = robot.h;
+
+    // cień
+    ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+    ctx.beginPath();
+    ctx.ellipse(x + w / 2, y + h + 5, w * 0.45, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // korpus
+    ctx.fillStyle = "#451a03";
+    roundRect(x, y + 8, w, h - 8, 10);
+    ctx.fill();
+
+    ctx.strokeStyle = "#fb923c";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // głowa / sensor
+    ctx.fillStyle = "#7c2d12";
+    roundRect(x + 8, y, w - 16, 20, 8);
+    ctx.fill();
+
+    // oczy
+    ctx.fillStyle = "#facc15";
+    ctx.beginPath();
+    ctx.arc(x + 17, y + 12, 4, 0, Math.PI * 2);
+    ctx.arc(x + 31, y + 12, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // antenka
+    ctx.strokeStyle = "#facc15";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x + w / 2, y);
+    ctx.lineTo(x + w / 2 + 8, y - 12);
+    ctx.stroke();
+
+    ctx.fillStyle = "#facc15";
+    ctx.beginPath();
+    ctx.arc(x + w / 2 + 8, y - 12, 3, 0, Math.PI * 2);
+    ctx.fill();
 }
 
 function drawPlayerShadow(x, y) {
@@ -810,6 +2597,73 @@ function drawPlayerBody(x, y) {
     ctx.fill();
 }
 
+function drawInstructionWindow() {
+    const w = 720;
+    const h = 500;
+    const x = canvas.width / 2 - w / 2;
+    const y = canvas.height / 2 - h / 2;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.62)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#08111f";
+    roundRect(x, y, w, h, 18);
+    ctx.fill();
+
+    ctx.strokeStyle = "#79ffe1";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = "#79ffe1";
+    ctx.font = "23px Arial";
+    ctx.fillText("INSTRUKCJA GRY", x + 32, y + 44);
+
+    const lines = [
+        ["Cel gry:", true],
+        ["Napraw wszystkie rdzenie i zdeponuj je w magazynie.", false],
+        ["Łącz uszkodzony rdzeń z właściwym modułem słowa.", false],
+
+        ["Sterowanie:", true],
+        ["WASD / strzałki — ruch", false],
+        ["E — podnieś / odłóż obiekt", false],
+        ["R — włóż / wyjmij obiekt z boxu lub skanera", false],
+        ["G — diagnostyka terminala lub skan ręczny", false],
+        ["L — link rdzenia z modułem w terminalu", false],
+        ["SPACJA — rzut niesionym obiektem", false],
+        ["I — instrukcja,  ESC — zamknij okno", false],
+
+        ["Skaner:", true],
+        ["Możesz przenieść go w teren. Włóż jeden obiekt i użyj G,", false],
+        ["aby szybko sprawdzić jego informację.", false],
+
+        ["Roboty psotniki:", true],
+        ["Działają poza laboratorium i przesuwają obiekty.", false],
+        ["Laboratorium jest bezpieczną strefą.", false]
+    ];
+
+    let lineY = y + 82;
+
+    for (const [text, header] of lines) {
+        if (header) {
+            lineY += 8;
+            ctx.fillStyle = "#b6ff6b";
+            ctx.font = "16px Arial";
+        } else {
+            ctx.fillStyle = "#c8fff4";
+            ctx.font = "14px Arial";
+        }
+
+        ctx.fillText(text, x + 36, lineY);
+        lineY += header ? 21 : 19;
+    }
+
+    ctx.fillStyle = "#79ffe1";
+    ctx.font = "15px Arial";
+    ctx.fillText("ESC — zamknij", x + 36, y + h - 24);
+}
+
 function drawUI() {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 
@@ -820,12 +2674,28 @@ function drawUI() {
     ctx.font = "18px Arial";
     ctx.fillText(message, 24, 35);
 
+    ctx.fillStyle = "#c8fff4";
+    ctx.font = "16px Arial";
+    ctx.fillText(
+        `Rdzenie: ${storedRepairedCores.length} / ${cores.length}`,
+        canvas.width - 170,
+        35
+    );
+
+    ctx.fillStyle = wrongLinks >= 2 ? "#ff8080" : "#fef3c7";
+    ctx.font = "16px Arial";
+    ctx.fillText(
+        `Błędy: ${wrongLinks} / ${WRONG_LINK_LIMIT}`,
+        canvas.width - 310,
+        35
+    );
+
     ctx.fillStyle = "rgba(4, 8, 16, 0.72)";
     ctx.fillRect(20, canvas.height - 54, 260, 34);
 
     ctx.fillStyle = "#c8fff4";
     ctx.font = "15px Arial";
-    ctx.fillText("WASD / strzałki — ruch", 36, canvas.height - 32);
+    ctx.fillText("WASD / strzałki — ruch    I — instrukcja", 36, canvas.height - 32);
 }
 
 function roundRect(x, y, w, h, r) {
