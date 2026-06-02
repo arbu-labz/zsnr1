@@ -45,6 +45,12 @@ window.addEventListener("keydown", e => {
         }
     }
 
+    if (key === "k") {
+        if (isPlayerNearKnowledgeTerminal()) {
+            knowledgeTerminalOpen = true;
+        }
+    }
+
     if (key === "1") {
         takeObjectFromRepairBox(0);
     }
@@ -60,6 +66,7 @@ window.addEventListener("keydown", e => {
     if (key === "escape") {
         diagnosticOpen = false;
         instructionOpen = false;
+        knowledgeTerminalOpen = false;
     }
 
     if (key === "l" && !lPressed) {
@@ -70,7 +77,7 @@ window.addEventListener("keydown", e => {
     if (key === " " && !spacePressed) {
         e.preventDefault();
         spacePressed = true;
-        throwCarriedObject();
+        //throwCarriedObject();
     }
     if (key === "i" && !iPressed) {
         iPressed = true;
@@ -108,6 +115,133 @@ window.addEventListener("keyup", e => {
     }
 });
 
+window.addEventListener("click", e => {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    if (
+        mouseX >= canvas.width - 640 &&
+        mouseX <= canvas.width - 640 + 170 &&
+        mouseY >= 11 &&
+        mouseY <= 11 + 34
+    ) {
+        window.open("generator.html", "_blank");
+        return;
+    }
+
+    if (
+        mouseX >= canvas.width - 455 &&
+        mouseX <= canvas.width - 455 + 125 &&
+        mouseY >= 11 &&
+        mouseY <= 11 + 34
+    ) {
+        databaseWindowOpen = true;
+        return;
+    }
+
+    if (databaseWindowOpen) {
+        const w = 640;
+        const h = 260;
+        const x = canvas.width / 2 - w / 2;
+        const y = canvas.height / 2 - h / 2;
+
+        const chooseX = x + 55;
+        const chooseY = y + 150;
+        const chooseW = 160;
+        const chooseH = 42;
+
+        if (
+            mouseX >= chooseX &&
+            mouseX <= chooseX + chooseW &&
+            mouseY >= chooseY &&
+            mouseY <= chooseY + chooseH
+        ) {
+            databaseFileInput.value = "";
+            databaseFileInput.click();
+            return;
+        }
+
+        const loadX = x + 240;
+        const loadY = y + 150;
+        const loadW = 160;
+        const loadH = 42;
+
+        if (
+            mouseX >= loadX &&
+            mouseX <= loadX + loadW &&
+            mouseY >= loadY &&
+            mouseY <= loadY + loadH
+        ) {
+            readSelectedDatabaseFile();
+            return;
+        }
+
+        const cancelX = x + 425;
+        const cancelY = y + 150;
+        const cancelW = 160;
+        const cancelH = 42;
+
+        if (
+            mouseX >= cancelX &&
+            mouseX <= cancelX + cancelW &&
+            mouseY >= cancelY &&
+            mouseY <= cancelY + cancelH
+        ) {
+            databaseWindowOpen = false;
+        }
+    }
+
+    if (startInfoWindowOpen) {
+        const w = 620;
+        const h = 360;
+        const x = canvas.width / 2 - w / 2;
+        const y = canvas.height / 2 - h / 2;
+
+        const startX = x + w / 2 - 90;
+        const startY = y + h - 70;
+        const startW = 180;
+        const startH = 42;
+
+        if (
+            mouseX >= startX &&
+            mouseX <= startX + startW &&
+            mouseY >= startY &&
+            mouseY <= startY + startH
+        ) {
+            startInfoWindowOpen = false;
+            showTemporaryMessage("Rozpoczęto poziom. Napraw wszystkie rdzenie.", 140);
+            return;
+        }
+
+        return;
+    }
+
+    if (knowledgeTerminalOpen) {
+        const w = 640;
+        const h = 420;
+        const x = canvas.width / 2 - w / 2;
+        const y = canvas.height / 2 - h / 2;
+
+        const closeX = x + w / 2 - 90;
+        const closeY = y + h - 65;
+        const closeW = 180;
+        const closeH = 42;
+
+        if (
+            mouseX >= closeX &&
+            mouseX <= closeX + closeW &&
+            mouseY >= closeY &&
+            mouseY <= closeY + closeH
+        ) {
+            knowledgeTerminalOpen = false;
+            return;
+        }
+
+        return;
+    }
+
+});
+
 const world = {
     width: 2600,
     height: 1800,
@@ -121,6 +255,22 @@ const lab = {
     h: 560,
     wall: 42,
     doorW: 150
+};
+
+const library = {
+    x: 2050,
+    y: 260,
+    w: 420,
+    h: 320,
+    wall: 32,
+    doorW: 110
+};
+
+const knowledgeTerminal = {
+    x: library.x + 38,
+    y: library.y + 48,
+    width: 96,
+    height: 88
 };
 
 const repairBox = {
@@ -159,6 +309,14 @@ const handScanner = {
 let scannerSlot = null;
 let scanPopupText = "";
 let scanPopupTimer = 0;
+let databaseWindowOpen = true;
+let startInfoWindowOpen = false;
+let knowledgeTerminalOpen = false;
+
+let databaseFileInput = null;
+let selectedDatabaseFile = null;
+let selectedDatabaseFileName = "Nie wybrano pliku";
+let databaseStatusText = "";
 
 function createPrankRobot(x, y) {
     return {
@@ -238,7 +396,11 @@ function getPrankRobotTargetCandidates() {
     return getPhysicalObjects().filter(obj => {
         const rect = getCollisionRect(obj);
 
-        return !isRectInsideLab(rect) && !isThrown(obj);
+        return (
+            !isRectInsideLab(rect) &&
+            !isRectInsideLibrary(rect) &&
+            !isThrown(obj)
+        );
     });
 }
 
@@ -273,17 +435,7 @@ const WORD_START_X = 380;
 const OBJECT_START_Y = 300;
 const OBJECT_GAP_Y = 70;
 
-const cores = GAME_CONTENT.cores.map((obj, index) => ({
-    ...obj,
-    label: "Rdzeń",
-    x: CORE_START_X,
-    y: OBJECT_START_Y + index * OBJECT_GAP_Y,
-    w: CORE_SIZE,
-    h: CORE_SIZE,
-    kind: "core",
-    repaired: false,
-    removed: false
-}));
+let cores = [];
 
 function shuffledIndexes(count) {
     const indexes = [];
@@ -300,21 +452,42 @@ function shuffledIndexes(count) {
     return indexes;
 }
 
-const wordDisplayOrder = shuffledIndexes(GAME_CONTENT.wordObjects.length);
+function buildObjectsFromTasks(tasks) {
+    cores = tasks.map((task, index) => ({
+        id: "core_" + task.id,
+        code: task.code,
+        correctWord: task.answer,
+        label: "Rdzeń",
+        x: CORE_START_X,
+        y: OBJECT_START_Y + index * OBJECT_GAP_Y,
+        w: CORE_SIZE,
+        h: CORE_SIZE,
+        kind: "core",
+        repaired: false,
+        removed: false
+    }));
 
-const wordObjects = GAME_CONTENT.wordObjects.map((obj, index) => {
-    const displayIndex = wordDisplayOrder[index];
+    const wordDisplayOrder = shuffledIndexes(tasks.length);
 
-    return {
-        ...obj,
-        label: "Moduł",
-        x: WORD_START_X,
-        y: OBJECT_START_Y + displayIndex * OBJECT_GAP_Y,
-        w: WORD_SIZE,
-        h: WORD_SIZE,
-        kind: "word"
-    };
-});
+    wordObjects = tasks.map((task, index) => {
+        const displayIndex = wordDisplayOrder[index];
+
+        return {
+            id: "word_" + task.id,
+            hiddenWord: task.answer,
+            label: "Moduł",
+            x: WORD_START_X,
+            y: OBJECT_START_Y + displayIndex * OBJECT_GAP_Y,
+            w: WORD_SIZE,
+            h: WORD_SIZE,
+            kind: "word"
+        };
+    });
+}
+
+let wordObjects = [];
+
+// buildObjectsFromTasks(GAME_CONTENT.tasks);
 
 const repairedCores = [];
 
@@ -369,6 +542,21 @@ function showTemporaryMessage(text, time = 90) {
 }
 
 function update() {
+    if (databaseWindowOpen) {
+        message = "Wybierz bazę zadań, aby rozpocząć grę.";
+        return;
+    }
+
+    if (startInfoWindowOpen) {
+        message = "Przeczytaj instrukcję startową i rozpocznij grę.";
+        return;
+    }
+
+    if (knowledgeTerminalOpen) {
+        message = "Terminal wiedzy jest otwarty.";
+        return;
+    }
+
     if (gameOver) {
         message = "GAME OVER — popełniono 3 błędne połączenia.";
         return;
@@ -507,6 +695,11 @@ function updateMessage() {
         return;
     }
 
+    if (isPlayerNearKnowledgeTerminal()) {
+        message = "Naciśnij K, aby otworzyć terminal wiedzy.";
+        return;
+    }
+
     if (isPlayerNearRect(handScanner, 90)) {
         if (scannerSlot) {
             message = "Ręczny skaner — R: wyjmij obiekt, G: skanuj.";
@@ -516,7 +709,7 @@ function updateMessage() {
         return;
     }
 
-    message = "Teren zewnętrzny — laboratorium jest bezpieczną bazą.";
+    message = "Teren zewnętrzny";
 }
 
 function interact() {
@@ -760,6 +953,7 @@ function getBlockingObjects(excludedObject = null) {
         repairBox,
         terminalDesk,
         coreStorage,
+        knowledgeTerminal,
         ...getPhysicalObjects(excludedObject)
     ];
 }
@@ -809,7 +1003,7 @@ function canMoveObject(obj, moveX, moveY) {
     }
 
     // ściany laboratorium
-    if (collidesWithLab(testRect)) {
+    if (collidesWithLab(testRect) || collidesWithLibrary(testRect)) {
         return false;
     }
 
@@ -1156,7 +1350,8 @@ function updatePrankRobot(robot) {
         isInRepairBox(robot.target) ||
         isRemoved(robot.target) ||
         isThrown(robot.target) ||
-        isRectInsideLab(getCollisionRect(robot.target))
+        isRectInsideLab(getCollisionRect(robot.target)) ||
+        isRectInsideLibrary(getCollisionRect(robot.target))
     ) {
         choosePrankRobotTarget(robot);
         return;
@@ -1237,7 +1432,9 @@ function movePrankRobot(robot, moveX, moveY) {
         testRect.x + testRect.w > world.width ||
         testRect.y + testRect.h > world.height ||
         collidesWithLab(testRect) ||
-        isRectInsideLab(testRect)
+        isRectInsideLab(testRect) ||
+        collidesWithLibrary(testRect) ||
+        isRectInsideLibrary(testRect)
     ) {
         return false;
     }
@@ -1246,6 +1443,15 @@ function movePrankRobot(robot, moveX, moveY) {
     robot.y += moveY;
 
     return true;
+}
+
+function isRectInsideLibrary(rect) {
+    return (
+        rect.x >= library.x &&
+        rect.y >= library.y &&
+        rect.x + rect.w <= library.x + library.w &&
+        rect.y + rect.h <= library.y + library.h
+    );
 }
 
 function startRobotEscape(robot) {
@@ -1328,11 +1534,31 @@ function isPlayerNearRect(rect, range) {
     return Math.hypot(px - rx, py - ry) < range;
 }
 
+function isPlayerNearKnowledgeTerminal() {
+    const playerCenterX = player.x + player.w / 2;
+    const playerCenterY = player.y + player.h / 2;
+
+    const terminalCenterX = knowledgeTerminal.x + knowledgeTerminal.width / 2;
+    const terminalCenterY = knowledgeTerminal.y + knowledgeTerminal.height / 2;
+
+    const dx = playerCenterX - terminalCenterX;
+    const dy = playerCenterY - terminalCenterY;
+
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    return distance < 110;
+}
+
 function movePlayer(moveX, moveY) {
     // RUCH W OSI X
     player.x += moveX;
 
-    if (collidesWithLab(player) || getStaticObjectCollidingWithRect(player)) {
+    if (
+        collidesWithLab(player) ||
+        collidesWithLibrary(player) ||
+        collidesWithKnowledgeTerminal(player) ||
+        getStaticObjectCollidingWithRect(player)
+    ) {
         player.x -= moveX;
     } else {
         const pushedObject = getPhysicalObjectCollidingWithRect(player);
@@ -1349,7 +1575,12 @@ function movePlayer(moveX, moveY) {
     // RUCH W OSI Y
     player.y += moveY;
 
-    if (collidesWithLab(player) || getStaticObjectCollidingWithRect(player)) {
+    if (
+        collidesWithLab(player) ||
+        collidesWithLibrary(player) ||
+        collidesWithKnowledgeTerminal(player) ||
+        getStaticObjectCollidingWithRect(player)
+    ) {
         player.y -= moveY;
     } else {
         const pushedObject = getPhysicalObjectCollidingWithRect(player);
@@ -1370,6 +1601,18 @@ function movePlayer(moveX, moveY) {
 
 function collidesWithLab(rect) {
     const walls = getLabWalls();
+
+    for (const wall of walls) {
+        if (rectsOverlap(rect, wall)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function collidesWithLibrary(rect) {
+    const walls = getLibraryWalls();
 
     for (const wall of walls) {
         if (rectsOverlap(rect, wall)) {
@@ -1457,6 +1700,43 @@ function getLabWalls() {
     ];
 }
 
+function getLibraryWalls() {
+    const doorX = library.x + library.w / 2 - library.doorW / 2;
+
+    return [
+        {
+            x: library.x,
+            y: library.y,
+            w: library.w,
+            h: library.wall
+        },
+        {
+            x: library.x,
+            y: library.y,
+            w: library.wall,
+            h: library.h
+        },
+        {
+            x: library.x + library.w - library.wall,
+            y: library.y,
+            w: library.wall,
+            h: library.h
+        },
+        {
+            x: library.x,
+            y: library.y + library.h - library.wall,
+            w: doorX - library.x,
+            h: library.wall
+        },
+        {
+            x: doorX + library.doorW,
+            y: library.y + library.h - library.wall,
+            w: library.x + library.w - (doorX + library.doorW),
+            h: library.wall
+        }
+    ];
+}
+
 function rectsOverlap(a, b) {
     return (
         a.x < b.x + b.w &&
@@ -1476,7 +1756,7 @@ function rectsOverlapWithPadding(a, b, padding = 10) {
 }
 
 function getDropBlockingObjects(excludedObject) {
-    const objects = [repairBox, terminalDesk, coreStorage];
+    const objects = [repairBox, terminalDesk, coreStorage, knowledgeTerminal];
 
     for (const core of cores) {
         if (
@@ -1569,7 +1849,7 @@ function isValidDropRect(testRect, droppedObject, playerWasInsideLab) {
     }
 
     // 4. Obiekt nie może nachodzić na ściany laboratorium
-    if (collidesWithLab(testRect)) {
+    if (collidesWithLab(testRect) || collidesWithLibrary(testRect)) {
         return false;
     }
 
@@ -1661,6 +1941,18 @@ function draw() {
 
     if (diagnosticOpen) {
         drawDiagnosticWindow();
+    }
+
+    if (databaseWindowOpen) {
+        drawDatabaseWindow();
+    }
+
+    if (startInfoWindowOpen) {
+        drawStartInfoWindow();
+    }
+
+    if (knowledgeTerminalOpen) {
+        drawKnowledgeTerminalWindow();
     }
 
     if (instructionOpen) {
@@ -2127,12 +2419,25 @@ function drawObjectInsideScanner(scannerX, scannerY, scannerW, scannerH, scale =
 }
 
 function drawScanPopup() {
-    const w = 420;
-    const h = 90;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    ctx.font = "18px Consolas, monospace";
+
+    const paddingX = 24;
+    const textWidth = ctx.measureText(scanPopupText).width;
+
+    let w = 420;
+    let h = 90;
+    let useWrappedText = false;
+
+    if (textWidth > w - paddingX * 2) {
+        w = 620;
+        h = 120;
+        useWrappedText = true;
+    }
+
     const x = canvas.width / 2 - w / 2;
     const y = 82;
-
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
 
     ctx.fillStyle = "rgba(8, 17, 31, 0.94)";
     roundRect(x, y, w, h, 14);
@@ -2147,15 +2452,47 @@ function drawScanPopup() {
     ctx.fillText("SKANER", x + 24, y + 32);
 
     ctx.fillStyle = "#c8fff4";
-    ctx.font = "20px Consolas, monospace";
-    ctx.fillText(scanPopupText, x + 24, y + 65);
+    ctx.font = "18px Consolas, monospace";
+
+    if (useWrappedText) {
+        drawWrappedScanText(scanPopupText, x + 24, y + 68, w - 48, 24);
+    } else {
+        ctx.fillText(scanPopupText, x + 24, y + 65);
+    }
+}
+
+function drawWrappedScanText(text, x, y, maxWidth, lineHeight) {
+    const words = text.split(" ");
+    let line = "";
+    let lineNumber = 0;
+
+    for (const word of words) {
+        const testLine = line === "" ? word : line + " " + word;
+
+        if (ctx.measureText(testLine).width <= maxWidth) {
+            line = testLine;
+        } else {
+            ctx.fillText(line, x, y + lineNumber * lineHeight);
+            lineNumber++;
+            line = word;
+        }
+    }
+
+    if (line !== "") {
+        ctx.fillText(line, x, y + lineNumber * lineHeight);
+    }
 }
 
 function drawMap() {
     drawBackground();
     drawGroundTiles();
+
     drawLab();
+    drawLibrary();
+
     drawLabEquipment();
+    drawKnowledgeTerminal();
+
     drawSoftDetails();
     drawMapBorder();
 }
@@ -2260,12 +2597,197 @@ function drawLab() {
 
     ctx.fillStyle = "#c8fff4";
     ctx.font = "26px Arial";
-    ctx.fillText("LABORATORIUM", lab.x + 250, lab.y + 32);
+    ctx.fillStyle = "#e5f7ff";
+    ctx.font = "26px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("LABORATORIUM", lab.x + lab.w / 2, lab.y + 34);
+    ctx.textAlign = "left";
 
     // delikatne oznaczenie wejścia
     ctx.fillStyle = "#0f172a";
     ctx.font = "15px Arial";
     ctx.fillText("WEJŚCIE", doorX + 45, doorY + 26);
+}
+
+function drawKnowledgeTerminal() {
+    const x = knowledgeTerminal.x;
+    const y = knowledgeTerminal.y;
+    const w = knowledgeTerminal.width;
+    const h = knowledgeTerminal.height;
+
+    // cień
+    ctx.fillStyle = "rgba(0, 0, 0, 0.22)";
+    ctx.beginPath();
+    ctx.ellipse(x + w / 2, y + h + 7, w * 0.42, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // podstawa
+    ctx.fillStyle = "#4b5563";
+    ctx.fillRect(x + w / 2 - 9, y + h - 6, 18, 10);
+
+    ctx.fillStyle = "#9ca3af";
+    roundRect(x + w / 2 - 24, y + h + 2, 48, 6, 3);
+    ctx.fill();
+
+    // główna tablica / obudowa
+    ctx.fillStyle = "#23405a";
+    roundRect(x, y, w, h - 10, 10);
+    ctx.fill();
+
+    ctx.strokeStyle = "#7dd3fc";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // górny napis
+    ctx.fillStyle = "#e0f2fe";
+    ctx.font = "12px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("TERMINAL", x + w / 2, y + 16);
+
+    // "książka" / panel wiedzy
+    const bx = x + 16;
+    const by = y + 26;
+    const bw = w - 32;
+    const bh = 34;
+
+    ctx.fillStyle = "#2563eb";
+    roundRect(bx, by, bw, bh, 6);
+    ctx.fill();
+
+    ctx.strokeStyle = "#93c5fd";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // podział książki
+    ctx.strokeStyle = "#dbeafe";
+    ctx.beginPath();
+    ctx.moveTo(x + w / 2, by + 4);
+    ctx.lineTo(x + w / 2, by + bh - 4);
+    ctx.stroke();
+
+    // linie tekstu lewej strony
+    ctx.strokeStyle = "#dbeafe";
+    ctx.beginPath();
+    ctx.moveTo(bx + 8, by + 10);
+    ctx.lineTo(x + w / 2 - 6, by + 10);
+    ctx.moveTo(bx + 8, by + 18);
+    ctx.lineTo(x + w / 2 - 10, by + 18);
+    ctx.stroke();
+
+    // znak zapytania po prawej
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "18px Arial";
+    ctx.fillText("?", x + w / 2 + 15, by + 24);
+
+    ctx.textAlign = "left";
+}
+
+function collidesWithKnowledgeTerminal(rect) {
+    return rectsOverlap(rect, {
+        x: knowledgeTerminal.x,
+        y: knowledgeTerminal.y,
+        w: knowledgeTerminal.width,
+        h: knowledgeTerminal.height
+    });
+}
+
+function drawLibrary() {
+    const doorX = library.x + library.w / 2 - library.doorW / 2;
+    const doorY = library.y + library.h - library.wall;
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.24)";
+    ctx.beginPath();
+    ctx.ellipse(
+        library.x + library.w / 2,
+        library.y + library.h + 16,
+        library.w * 0.45,
+        28,
+        0,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
+
+    // podłoga
+    ctx.fillStyle = "#1c1a2e";
+    ctx.fillRect(
+        library.x + library.wall,
+        library.y + library.wall,
+        library.w - library.wall * 2,
+        library.h - library.wall * 2
+    );
+
+    // delikatne linie podłogi
+    ctx.strokeStyle = "rgba(255, 210, 120, 0.08)";
+    ctx.lineWidth = 1;
+
+    for (let x = library.x + library.wall; x < library.x + library.w - library.wall; x += 70) {
+        ctx.beginPath();
+        ctx.moveTo(x, library.y + library.wall);
+        ctx.lineTo(x, library.y + library.h - library.wall);
+        ctx.stroke();
+    }
+
+    for (let y = library.y + library.wall; y < library.y + library.h - library.wall; y += 70) {
+        ctx.beginPath();
+        ctx.moveTo(library.x + library.wall, y);
+        ctx.lineTo(library.x + library.w - library.wall, y);
+        ctx.stroke();
+    }
+
+    // ściany
+    ctx.fillStyle = "#221827";
+
+    ctx.fillRect(library.x, library.y, library.w, library.wall);
+    ctx.fillRect(library.x, library.y, library.wall, library.h);
+    ctx.fillRect(library.x + library.w - library.wall, library.y, library.wall, library.h);
+
+    ctx.fillRect(library.x, doorY, doorX - library.x, library.wall);
+    ctx.fillRect(
+        doorX + library.doorW,
+        doorY,
+        library.x + library.w - (doorX + library.doorW),
+        library.wall
+    );
+
+    // jaśniejsze krawędzie
+    ctx.fillStyle = "#3b2745";
+    ctx.fillRect(library.x, library.y, library.w, 12);
+    ctx.fillRect(library.x, library.y, 12, library.h);
+    ctx.fillRect(library.x + library.w - 12, library.y, 12, library.h);
+
+    ctx.fillRect(library.x, doorY, doorX - library.x, 12);
+    ctx.fillRect(
+        doorX + library.doorW,
+        doorY,
+        library.x + library.w - (doorX + library.doorW),
+        12
+    );
+
+    // obrys
+    ctx.strokeStyle = "#ffd166";
+    ctx.lineWidth = 4;
+    ctx.strokeRect(library.x, library.y, library.w, library.h);
+
+    // maska drzwi
+    ctx.fillStyle = "#1c1a2e";
+    ctx.fillRect(doorX - 6, doorY - 4, library.doorW + 12, library.wall + 12);
+
+    // próg
+    ctx.fillStyle = "#ffd166";
+    roundRect(doorX, doorY + 7, library.doorW, 22, 8);
+    ctx.fill();
+
+    ctx.fillStyle = "#ffe8a3";
+    ctx.font = "24px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("BIBLIOTEKA", library.x + library.w / 2, library.y + 34);
+
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "14px Arial";
+    ctx.fillText("WEJŚCIE", doorX + library.doorW / 2, doorY + 24);
+
+    ctx.textAlign = "left";
 }
 
 function drawLabEquipment() {
@@ -2373,6 +2895,50 @@ function drawTerminalDesk() {
     ctx.fillStyle = "#c8fff4";
     ctx.font = "15px Arial";
     ctx.fillText("TERMINAL", x + 70, y + h - 18);
+}
+
+function drawKnowledgeTerminalWindow() {
+    const w = 640;
+    const h = 420;
+    const x = canvas.width / 2 - w / 2;
+    const y = canvas.height / 2 - h / 2;
+
+    ctx.fillStyle = "rgba(5, 12, 24, 0.95)";
+    ctx.fillRect(x, y, w, h);
+
+    ctx.strokeStyle = "#7dd3fc";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, w, h);
+
+    ctx.fillStyle = "#e0f2fe";
+    ctx.font = "26px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("TERMINAL WIEDZY", x + w / 2, y + 48);
+
+    ctx.fillStyle = "#c8fff4";
+    ctx.font = "17px Arial";
+    ctx.textAlign = "left";
+
+    const lines = [
+        "Tutaj będą pojawiać się informacje z aktualnej bazy wiedzy.",
+        "",
+        "Na razie terminal został poprawnie otwarty.",
+        "W następnym kroku pokażemy tutaj tematy:",
+        "- topic",
+        "- hint",
+        "- explanation"
+    ];
+
+    let textY = y + 95;
+
+    for (const line of lines) {
+        ctx.fillText(line, x + 50, textY);
+        textY += 28;
+    }
+
+    drawDatabaseButton(x + w / 2 - 90, y + h - 65, 180, 42, "ZAMKNIJ");
+
+    ctx.textAlign = "left";
 }
 
 function drawCoreStorage() {
@@ -2712,6 +3278,121 @@ function drawPlayerBody(x, y) {
     ctx.fill();
 }
 
+function drawDatabaseWindow() {
+    const w = 640;
+    const h = 260;
+    const x = canvas.width / 2 - w / 2;
+    const y = canvas.height / 2 - h / 2;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.62)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#08111f";
+    roundRect(x, y, w, h, 18);
+    ctx.fill();
+
+    ctx.strokeStyle = "#79ffe1";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = "#79ffe1";
+    ctx.font = "24px Arial";
+    ctx.fillText("WYBIERZ BAZĘ", x + 32, y + 48);
+
+    ctx.fillStyle = "#c8fff4";
+    ctx.font = "16px Arial";
+    ctx.fillText("Wczytaj plik .js z danymi do gry.", x + 32, y + 86);
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "14px Arial";
+    ctx.fillText("Wybierz plik bazy, a następnie wczytaj go do gry.", x + 32, y + 116);
+
+    // przyciski testowe
+    drawDatabaseButton(x + 55, y + 150, 160, 42, "WYBIERZ PLIK");
+    drawDatabaseButton(x + 240, y + 150, 160, 42, "WCZYTAJ");
+    drawDatabaseButton(x + 425, y + 150, 160, 42, "ANULUJ");
+
+    ctx.fillStyle = "#c8fff4";
+    ctx.font = "14px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(selectedDatabaseFileName, x + w / 2, y + 216);
+
+    if (databaseStatusText) {
+        ctx.fillStyle = "#ff8080";
+        ctx.font = "14px Arial";
+        ctx.fillText(databaseStatusText, x + w / 2, y + 238);
+    }
+
+    ctx.textAlign = "left";
+}
+
+function drawStartInfoWindow() {
+    const w = 620;
+    const h = 360;
+    const x = canvas.width / 2 - w / 2;
+    const y = canvas.height / 2 - h / 2;
+
+    ctx.fillStyle = "rgba(5, 12, 24, 0.94)";
+    ctx.fillRect(x, y, w, h);
+
+    ctx.strokeStyle = "#79ffe1";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, w, h);
+
+    ctx.fillStyle = "#79ffe1";
+    ctx.font = "26px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("START POZIOMU", x + w / 2, y + 48);
+
+    ctx.fillStyle = "#e5f7ff";
+    ctx.font = "18px Arial";
+    ctx.textAlign = "left";
+
+    const lines = [
+        "Cel: napraw wszystkie rdzenie anomalii.",
+        "",
+        "1. Znajdź uszkodzony rdzeń na mapie.",
+        "2. Zanieś go do laboratorium i zeskanuj.",
+        "3. Odszukaj pasujący moduł kodu.",
+        "4. Połącz rdzeń z poprawnym modułem.",
+        "5. Odłóż naprawiony rdzeń do magazynu.",
+        "",
+        "Uważaj na roboty psotniki — mogą przesuwać obiekty."
+    ];
+
+    let textY = y + 82;
+
+    for (const line of lines) {
+        ctx.fillText(line, x + 50, textY);
+        textY += 22;
+    }
+
+    drawDatabaseButton(x + w / 2 - 90, y + h - 70, 180, 42, "START");
+
+    ctx.textAlign = "left";
+}
+
+function drawDatabaseButton(x, y, w, h, text) {
+    ctx.fillStyle = "#08111f";
+    roundRect(x, y, w, h, 10);
+    ctx.fill();
+
+    ctx.strokeStyle = "#38bdf8";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#79ffe1";
+    ctx.font = "14px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(text, x + w / 2, y + h / 2);
+
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+}
+
 function drawInstructionWindow() {
     const w = 720;
     const h = 500;
@@ -2789,19 +3470,22 @@ function drawUI() {
     ctx.font = "18px Arial";
     ctx.fillText(message, 24, 35);
 
-    ctx.fillStyle = "#c8fff4";
-    ctx.font = "16px Arial";
-    ctx.fillText(
-        `Rdzenie: ${storedRepairedCores.length} / ${cores.length}`,
-        canvas.width - 170,
-        35
-    );
+    drawDatabaseButton(canvas.width - 640, 11, 170, 34, "GENERATOR BAZY");
+    drawDatabaseButton(canvas.width - 455, 11, 125, 34, "ZMIEŃ BAZĘ");
 
     ctx.fillStyle = wrongLinks >= 2 ? "#ff8080" : "#fef3c7";
     ctx.font = "16px Arial";
     ctx.fillText(
         `Błędy: ${wrongLinks} / ${WRONG_LINK_LIMIT}`,
         canvas.width - 310,
+        35
+    );
+
+    ctx.fillStyle = "#c8fff4";
+    ctx.font = "16px Arial";
+    ctx.fillText(
+        `Rdzenie: ${storedRepairedCores.length} / ${cores.length}`,
+        canvas.width - 170,
         35
     );
 
@@ -2827,10 +3511,193 @@ function roundRect(x, y, w, h, r) {
     ctx.closePath();
 }
 
+function createDatabaseFileInput() {
+    databaseFileInput = document.createElement("input");
+    databaseFileInput.type = "file";
+    databaseFileInput.accept = ".js";
+    databaseFileInput.style.display = "none";
+
+    databaseFileInput.addEventListener("change", function () {
+        selectedDatabaseFile = databaseFileInput.files[0] || null;
+        databaseStatusText = "";
+
+        if (selectedDatabaseFile) {
+            selectedDatabaseFileName = selectedDatabaseFile.name;
+        } else {
+            selectedDatabaseFileName = "Nie wybrano pliku";
+        }
+    });
+
+    document.body.appendChild(databaseFileInput);
+}
+
+function resetGameStateForNewDatabase() {
+    player.x = 500;
+    player.y = 500;
+    player.moving = false;
+    player.walkTime = 0;
+    player.dirX = 0;
+    player.dirY = 1;
+
+    camera.x = 0;
+    camera.y = 0;
+
+    carriedObject = null;
+    scannerSlot = null;
+
+    repairedCores.length = 0;
+    repairBoxSlots.length = 0;
+    storedRepairedCores.length = 0;
+    removedObjects.length = 0;
+    thrownObjects.length = 0;
+
+    wrongLinks = 0;
+    gameOver = false;
+    levelCompleted = false;
+    diagnosticOpen = false;
+    instructionOpen = false;
+
+    temporaryMessage = null;
+    temporaryMessageTimer = 0;
+    scanPopupText = "";
+    scanPopupTimer = 0;
+    linkErrorFlash = 0;
+
+    prankRobots[0].x = 1750;
+    prankRobots[0].y = 760;
+
+    prankRobots[1].x = 2050;
+    prankRobots[1].y = 1050;
+
+    prankRobots[2].x = 2350;
+    prankRobots[2].y = 1360;
+
+    for (const robot of prankRobots) {
+        robot.target = null;
+        robot.pushDirX = 0;
+        robot.pushDirY = 0;
+        robot.pushTimer = 0;
+        robot.waitTimer = 0;
+        robot.skippedTarget = null;
+        robot.skipTimer = 0;
+        robot.escapeTimer = 0;
+        robot.escapeDirX = 0;
+        robot.escapeDirY = 0;
+    }
+}
+
+function applyDatabaseTasks(tasks) {
+    buildObjectsFromTasks(tasks);
+    resetGameStateForNewDatabase();
+
+    databaseWindowOpen = false;
+    startInfoWindowOpen = true;
+    databaseStatusText = "";
+    selectedDatabaseFile = null;
+    selectedDatabaseFileName = "Nie wybrano pliku";
+
+    if (databaseFileInput) {
+        databaseFileInput.value = "";
+    }
+
+    showTemporaryMessage("Baza wczytana. Rozpocznij naprawę rdzeni.", 140);
+}
+
+function validateLoadedTasks(tasks) {
+    if (!Array.isArray(tasks)) {
+        return "Błąd bazy — tasks nie jest tablicą.";
+    }
+
+    if (tasks.length === 0) {
+        return "Błąd bazy — lista tasks jest pusta.";
+    }
+
+    const ids = new Set();
+
+    for (let i = 0; i < tasks.length; i++) {
+        const task = tasks[i];
+        const rowNumber = i + 1;
+
+        if (!task || typeof task !== "object") {
+            return "Błąd w zadaniu " + rowNumber + " — niepoprawny obiekt.";
+        }
+
+        if (!task.id || typeof task.id !== "string") {
+            return "Błąd w zadaniu " + rowNumber + " — brak id.";
+        }
+
+        if (ids.has(task.id)) {
+            return "Błąd w zadaniu " + rowNumber + " — powtórzone id: " + task.id + ".";
+        }
+
+        ids.add(task.id);
+
+        if (!task.code || typeof task.code !== "string") {
+            return "Błąd w zadaniu " + rowNumber + " — brak code.";
+        }
+
+        if (!task.code.includes("___")) {
+            return "Błąd w zadaniu " + rowNumber + " — code nie zawiera ___.";
+        }
+
+        if (!task.answer || typeof task.answer !== "string") {
+            return "Błąd w zadaniu " + rowNumber + " — brak answer.";
+        }
+    }
+
+    return null;
+}
+
+function readSelectedDatabaseFile() {
+    if (!selectedDatabaseFile) {
+        databaseStatusText = "Najpierw wybierz plik bazy.";
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+        try {
+            const fileText = event.target.result;
+
+            if (!/const\s+GAME_CONTENT\s*=/.test(fileText)) {
+                databaseStatusText = "Błąd bazy — plik nie zawiera const GAME_CONTENT.";
+                return;
+            }
+
+            const loadedContent = new Function(`
+    ${fileText}
+    return GAME_CONTENT;
+`)();
+
+            if (!loadedContent || !loadedContent.tasks) {
+                databaseStatusText = "Błąd bazy — brak GAME_CONTENT.tasks.";
+                return;
+            }
+
+            const validationError = validateLoadedTasks(loadedContent.tasks);
+
+            if (validationError) {
+                databaseStatusText = validationError;
+                return;
+            }
+
+            applyDatabaseTasks(loadedContent.tasks);
+
+        } catch (error) {
+            databaseStatusText = "Błąd wczytywania bazy.";
+            console.error(error);
+        }
+    };
+
+    reader.readAsText(selectedDatabaseFile, "UTF-8");
+}
+
 function gameLoop() {
     update();
     draw();
     requestAnimationFrame(gameLoop);
 }
 
+createDatabaseFileInput();
 gameLoop();
