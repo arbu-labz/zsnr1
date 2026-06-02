@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Generator content.js</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: #e5f7ff;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 40px auto;
+      padding: 24px;
+    }
+
+    .card {
+      background: #111827;
+      border: 1px solid #38bdf8;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.15);
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #79ffe1;
+    }
+
+    p {
+      color: #c8fff4;
+      line-height: 1.5;
+    }
+
+    input,
+    button {
+      font-size: 16px;
+    }
+
+    input[type="file"],
+    input[type="text"] {
+      display: block;
+      margin: 12px 0 18px 0;
+      padding: 12px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      color: #e5f7ff;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 12px 18px;
+      border: 0;
+      border-radius: 10px;
+      background: #22c55e;
+      color: #04130a;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    button:disabled {
+      background: #475569;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 16px;
+      color: #fef3c7;
+    }
+
+    .error {
+      color: #ff8080;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #334155;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #79ffe1;
+    }
+
+    code {
+      color: #b6ff6b;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <div class="card">
+      <h1>Generator content.js</h1>
+
+      <p>
+        Wybierz plik CSV przygotowany w Excelu. Generator utworzy gotowy plik
+        <code>content.js</code> do podmiany w folderze gry.
+      </p>
+
+      <p class="small">
+        Wymagane kolumny: <code>id</code>, <code>code</code>, <code>answer</code>.
+        Dodatkowe kolumny: <code>topic</code>, <code>hint</code>, <code>explanation</code>.
+      </p>
+
+      <div class="small" style="margin: 14px 0 20px 0; line-height: 1.6;">
+        <strong style="color:#79ffe1;">Jak przygotować CSV?</strong><br>
+        <code>id</code> — unikalny numer zadania, np. t1, t2, t3<br>
+        <code>code</code> — fragment kodu z luką oznaczoną jako <code>___</code><br>
+        <code>answer</code> — poprawna odpowiedź, która pasuje do luki<br>
+        <code>topic</code>, <code>hint</code>, <code>explanation</code> — pola opcjonalne<br>
+        Najbezpieczniej używać średnika <code>;</code> jako separatora kolumn.
+      </div>
+
+      <button id="emptyCsvBtn">Pobierz CSV z przykładami</button>
+      <button id="exampleContentBtn">Pobierz przykładową bazę</button>
+      <input id="csvFile" type="file" accept=".csv,text/csv" />
+      <label for="outputFileName" class="small">Nazwa generowanego pliku:</label>
+      <input id="outputFileName" type="text" value="content.js" />
+
+      <button id="downloadBtn" disabled>Pobierz plik</button>
+      <button id="clearBtn" disabled>Wyczyść</button>
+
+      <div id="status" class="status">Nie wybrano pliku.</div>
+
+      <table id="previewTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>code</th>
+            <th>answer</th>
+            <th>topic</th>
+            <th>hint</th>
+            <th>explanation</th>
+          </tr>
+        </thead>
+        <tbody id="previewBody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const csvFileInput = document.getElementById("csvFile");
+    const emptyCsvBtn = document.getElementById("emptyCsvBtn");
+    const exampleContentBtn = document.getElementById("exampleContentBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const outputFileNameInput = document.getElementById("outputFileName");
+    const clearBtn = document.getElementById("clearBtn");
+    const statusBox = document.getElementById("status");
+    const previewTable = document.getElementById("previewTable");
+    const previewBody = document.getElementById("previewBody");
+
+    let generatedContent = "";
+    let parsedTasks = [];
+
+    csvFileInput.addEventListener("change", handleFileSelect);
+    downloadBtn.addEventListener("click", downloadContentFile);
+    clearBtn.addEventListener("click", clearGenerator);
+    emptyCsvBtn.addEventListener("click", downloadEmptyCsvTemplate);
+    exampleContentBtn.addEventListener("click", downloadExampleContentFile);
+
+    function getExampleTasks() {
+      return [
+        {
+          id: "t1",
+          code: "Application.Current.MainPage = new ___();",
+          answer: "AppShell",
+          topic: "MAUI start aplikacji",
+          hint: "Główna powłoka aplikacji MAUI.",
+          explanation: "AppShell odpowiada za główną strukturę nawigacji aplikacji."
+        },
+        {
+          id: "t2",
+          code: "<Label Text=\"___\" />",
+          answer: "Witaj w aplikacji",
+          topic: "Label",
+          hint: "Label wyświetla tekst.",
+          explanation: "Kontrolka Label służy do pokazywania tekstu użytkownikowi."
+        },
+        {
+          id: "t3",
+          code: "<Button Text=\"Kliknij\" Clicked=\"___\" />",
+          answer: "OnButtonClicked",
+          topic: "Button",
+          hint: "Nazwa metody obsługującej kliknięcie.",
+          explanation: "Zdarzenie Clicked wskazuje metodę, która uruchomi się po kliknięciu przycisku."
+        },
+        {
+          id: "t4",
+          code: "<Entry Placeholder=\"___\" />",
+          answer: "Wpisz tekst",
+          topic: "Entry",
+          hint: "Placeholder to tekst pomocniczy w polu.",
+          explanation: "Entry pozwala użytkownikowi wpisywać dane tekstowe."
+        },
+        {
+          id: "t5",
+          code: "<Image Source=\"___\" />",
+          answer: "robot.png",
+          topic: "Image",
+          hint: "Nazwa pliku graficznego.",
+          explanation: "Kontrolka Image wyświetla obraz z pliku dodanego do projektu."
+        }
+      ];
+    }
+
+    function downloadExampleContentFile() {
+      const exampleTasks = getExampleTasks();
+      const content = buildContentJs(exampleTasks);
+
+      const blob = new Blob([content], {
+        type: "application/javascript;charset=utf-8"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "content-example.js";
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadEmptyCsvTemplate() {
+      const exampleTasks = getExampleTasks();
+
+      let csvContent = "id;code;answer;topic;hint;explanation\n";
+
+      for (const task of exampleTasks) {
+        csvContent += [
+          task.id,
+          task.code,
+          task.answer,
+          task.topic,
+          task.hint,
+          task.explanation
+        ].map(escapeCsvCell).join(";") + "\n";
+      }
+
+      const blob = new Blob(["\ufeff" + csvContent], {
+        type: "text/csv;charset=utf-8"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "content-template.csv";
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function escapeCsvCell(value) {
+      const text = String(value ?? "");
+
+      if (
+        text.includes(";") ||
+        text.includes('"') ||
+        text.includes("\n") ||
+        text.includes("\r")
+      ) {
+        return '"' + text.replaceAll('"', '""') + '"';
+      }
+
+      return text;
+    }
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        try {
+          const csvText = e.target.result;
+          parsedTasks = parseCsvToTasks(csvText);
+
+          if (parsedTasks.length === 0) {
+            showError("Nie znaleziono żadnych poprawnych zadań w pliku CSV.");
+            return;
+          }
+
+          generatedContent = buildContentJs(parsedTasks);
+          renderPreview(parsedTasks);
+
+          statusBox.className = "status";
+          statusBox.textContent = "Wczytano zadań: " + parsedTasks.length + ". Możesz pobrać content.js.";
+
+          downloadBtn.disabled = false;
+          clearBtn.disabled = false;
+        } catch (error) {
+          showError(error.message);
+        }
+      };
+
+      reader.readAsText(file, "UTF-8");
+    }
+
+    function parseCsvToTasks(csvText) {
+      const separator = detectSeparator(csvText);
+      const rows = parseCsv(csvText, separator)
+        .filter(row => row.some(cell => cell.trim() !== ""));
+
+      if (rows.length < 2) {
+        throw new Error("CSV musi mieć nagłówek i przynajmniej jeden wiersz z zadaniem.");
+      }
+
+      const headers = rows[0].map(header => normalizeHeader(header));
+      const required = ["id", "code", "answer"];
+
+      for (const name of required) {
+        if (!headers.includes(name)) {
+          throw new Error("Brakuje wymaganej kolumny: " + name);
+        }
+      }
+
+      const tasks = [];
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const item = {};
+
+        headers.forEach((header, index) => {
+          item[header] = row[index] ? row[index].trim() : "";
+        });
+
+        if (!item.id && !item.code && !item.answer) {
+          continue;
+        }
+
+        if (!item.id || !item.code || !item.answer) {
+          throw new Error("Wiersz " + (i + 1) + " ma puste pole id, code albo answer.");
+        }
+
+        if (!item.code.includes("___")) {
+          throw new Error("Wiersz " + (i + 1) + " nie ma luki ___ w kolumnie code.");
+        }
+
+        tasks.push({
+          id: item.id,
+          code: item.code,
+          answer: item.answer,
+          topic: item.topic || "",
+          hint: item.hint || "",
+          explanation: item.explanation || ""
+        });
+      }
+
+      checkDuplicateIds(tasks);
+      return tasks;
+    }
+
+    function detectSeparator(text) {
+      const firstLine = text.split(/\r?\n/)[0] || "";
+      const semicolonCount = (firstLine.match(/;/g) || []).length;
+      const commaCount = (firstLine.match(/,/g) || []).length;
+
+      return semicolonCount >= commaCount ? ";" : ",";
+    }
+
+    function parseCsv(text, separator) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let insideQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"' && insideQuotes && nextChar === '"') {
+          cell += '"';
+          i++;
+          continue;
+        }
+
+        if (char === '"') {
+          insideQuotes = !insideQuotes;
+          continue;
+        }
+
+        if (char === separator && !insideQuotes) {
+          row.push(cell);
+          cell = "";
+          continue;
+        }
+
+        if ((char === "\n" || char === "\r") && !insideQuotes) {
+          if (char === "\r" && nextChar === "\n") {
+            i++;
+          }
+
+          row.push(cell);
+          rows.push(row);
+          row = [];
+          cell = "";
+          continue;
+        }
+
+        cell += char;
+      }
+
+      row.push(cell);
+      rows.push(row);
+
+      return rows;
+    }
+
+    function normalizeHeader(header) {
+      return header
+        .trim()
+        .toLowerCase()
+        .replace(/\uFEFF/g, "");
+    }
+
+    function checkDuplicateIds(tasks) {
+      const ids = new Set();
+
+      for (const task of tasks) {
+        if (ids.has(task.id)) {
+          throw new Error("Powtarza się id zadania: " + task.id);
+        }
+
+        ids.add(task.id);
+      }
+    }
+
+    function buildContentJs(tasks) {
+      return "const GAME_CONTENT = " + JSON.stringify({ tasks }, null, 4) + ";\n";
+    }
+
+    function renderPreview(tasks) {
+      previewBody.innerHTML = "";
+
+      for (const task of tasks) {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${escapeHtml(task.id)}</td>
+          <td><code>${escapeHtml(task.code)}</code></td>
+          <td>${escapeHtml(task.answer)}</td>
+          <td>${escapeHtml(task.topic)}</td>
+          <td>${escapeHtml(task.hint)}</td>
+          <td>${escapeHtml(task.explanation)}</td>
+        `;
+
+        previewBody.appendChild(tr);
+      }
+
+      previewTable.style.display = "table";
+    }
+
+    function downloadContentFile() {
+      const blob = new Blob([generatedContent], { type: "application/javascript;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = getOutputFileName();
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function clearGenerator() {
+      csvFileInput.value = "";
+      outputFileNameInput.value = "content.js";
+      generatedContent = "";
+      parsedTasks = [];
+      previewBody.innerHTML = "";
+      previewTable.style.display = "none";
+      downloadBtn.disabled = true;
+      clearBtn.disabled = true;
+      statusBox.className = "status";
+      statusBox.textContent = "Nie wybrano pliku.";
+    }
+
+    function showError(message) {
+      generatedContent = "";
+      parsedTasks = [];
+      previewBody.innerHTML = "";
+      previewTable.style.display = "none";
+      downloadBtn.disabled = true;
+      clearBtn.disabled = false;
+      statusBox.className = "status error";
+      statusBox.textContent = "Błąd: " + message;
+    }
+
+    function getOutputFileName() {
+      let fileName = outputFileNameInput.value.trim();
+
+      if (fileName === "") {
+        fileName = "content.js";
+      }
+
+      if (!fileName.toLowerCase().endsWith(".js")) {
+        fileName += ".js";
+      }
+
+      return fileName;
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+  </script>
+</body>
+
+</html>
