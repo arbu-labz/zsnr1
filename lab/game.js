@@ -141,14 +141,29 @@ window.addEventListener("click", e => {
 
     if (databaseWindowOpen) {
         const w = 640;
-        const h = 260;
+        const h = 330;
         const x = canvas.width / 2 - w / 2;
         const y = canvas.height / 2 - h / 2;
 
         const chooseX = x + 55;
-        const chooseY = y + 150;
+        const chooseY = y + 205;
         const chooseW = 160;
         const chooseH = 42;
+
+        const projectBaseX = x + 55;
+        const projectBaseY = y + 135;
+        const projectBaseW = 530;
+        const projectBaseH = 42;
+
+        if (
+            mouseX >= projectBaseX &&
+            mouseX <= projectBaseX + projectBaseW &&
+            mouseY >= projectBaseY &&
+            mouseY <= projectBaseY + projectBaseH
+        ) {
+            loadDatabaseFromProjectFile(availableDatabases[0]);
+            return;
+        }
 
         if (
             mouseX >= chooseX &&
@@ -162,7 +177,7 @@ window.addEventListener("click", e => {
         }
 
         const loadX = x + 240;
-        const loadY = y + 150;
+        const loadY = y + 205;
         const loadW = 160;
         const loadH = 42;
 
@@ -177,7 +192,7 @@ window.addEventListener("click", e => {
         }
 
         const cancelX = x + 425;
-        const cancelY = y + 150;
+        const cancelY = y + 205;
         const cancelW = 160;
         const cancelH = 42;
 
@@ -312,6 +327,14 @@ let scanPopupTimer = 0;
 let databaseWindowOpen = true;
 let startInfoWindowOpen = false;
 let knowledgeTerminalOpen = false;
+
+
+const availableDatabases = [
+    {
+        name: "BAZA: content.js",
+        file: "content.js"
+    }
+];
 
 let databaseFileInput = null;
 let selectedDatabaseFile = null;
@@ -3280,7 +3303,7 @@ function drawPlayerBody(x, y) {
 
 function drawDatabaseWindow() {
     const w = 640;
-    const h = 260;
+    const h = 330;
     const x = canvas.width / 2 - w / 2;
     const y = canvas.height / 2 - h / 2;
 
@@ -3308,21 +3331,22 @@ function drawDatabaseWindow() {
     ctx.fillStyle = "#94a3b8";
     ctx.font = "14px Arial";
     ctx.fillText("Wybierz plik bazy, a następnie wczytaj go do gry.", x + 32, y + 116);
+    drawDatabaseButton(x + 55, y + 135, 530, 42, availableDatabases[0].name);
 
     // przyciski testowe
-    drawDatabaseButton(x + 55, y + 150, 160, 42, "WYBIERZ PLIK");
-    drawDatabaseButton(x + 240, y + 150, 160, 42, "WCZYTAJ");
-    drawDatabaseButton(x + 425, y + 150, 160, 42, "ANULUJ");
+    drawDatabaseButton(x + 55, y + 205, 160, 42, "WYBIERZ PLIK");
+    drawDatabaseButton(x + 240, y + 205, 160, 42, "WCZYTAJ");
+    drawDatabaseButton(x + 425, y + 205, 160, 42, "ANULUJ");
 
     ctx.fillStyle = "#c8fff4";
     ctx.font = "14px Arial";
     ctx.textAlign = "center";
-    ctx.fillText(selectedDatabaseFileName, x + w / 2, y + 216);
+    ctx.fillText(selectedDatabaseFileName, x + w / 2, y + 275);
 
     if (databaseStatusText) {
         ctx.fillStyle = "#ff8080";
         ctx.font = "14px Arial";
-        ctx.fillText(databaseStatusText, x + w / 2, y + 238);
+        ctx.fillText(databaseStatusText, x + w / 2, y + 300);
     }
 
     ctx.textAlign = "left";
@@ -3646,6 +3670,49 @@ function validateLoadedTasks(tasks) {
     }
 
     return null;
+}
+
+async function loadDatabaseFromProjectFile(database) {
+    try {
+        databaseStatusText = "Wczytywanie: " + database.file + "...";
+
+        const response = await fetch(database.file + "?v=" + Date.now());
+
+        if (!response.ok) {
+            databaseStatusText = "Błąd — nie znaleziono pliku " + database.file + ".";
+            return;
+        }
+
+        const fileText = await response.text();
+
+        if (!/const\s+GAME_CONTENT\s*=/.test(fileText)) {
+            databaseStatusText = "Błąd bazy — plik nie zawiera const GAME_CONTENT.";
+            return;
+        }
+
+        const loadedContent = new Function(`
+            ${fileText}
+            return GAME_CONTENT;
+        `)();
+
+        if (!loadedContent || !loadedContent.tasks) {
+            databaseStatusText = "Błąd bazy — brak GAME_CONTENT.tasks.";
+            return;
+        }
+
+        const validationError = validateLoadedTasks(loadedContent.tasks);
+
+        if (validationError) {
+            databaseStatusText = validationError;
+            return;
+        }
+
+        applyDatabaseTasks(loadedContent.tasks);
+
+    } catch (error) {
+        databaseStatusText = "Błąd wczytywania pliku z folderu gry.";
+        console.error(error);
+    }
 }
 
 function readSelectedDatabaseFile() {
